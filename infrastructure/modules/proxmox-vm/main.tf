@@ -1,9 +1,10 @@
 resource "proxmox_virtual_environment_vm" "this" {
-    name    = var.name
-    node_name = var.node_name
-    vm_id = var.vm_id
-    description = var.description
-    tags = var.tags
+    name            = var.name
+    node_name       = var.node_name
+    vm_id           = var.vm_id
+    description     = var.description
+    tags            = var.tags
+    keyboard_layout = var.keyboard_layout
 
     clone {
         vm_id = var.template_vm_id
@@ -39,6 +40,7 @@ resource "proxmox_virtual_environment_vm" "this" {
     boot_order = ["virtio0"]
 
     initialization {
+        datastore_id = var.initialization_datastore_id
         ip_config {
             ipv4 {
                 address = var.ipv4_cidr
@@ -48,7 +50,7 @@ resource "proxmox_virtual_environment_vm" "this" {
 
         user_account {
             username = var.username
-            password = var.password
+            password = var.ubuntu_password
             keys = [trimspace(var.ssh_public_key)]
         }
     }

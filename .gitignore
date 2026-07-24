@@ -1,1 +1,24 @@
-.tfvars
+# Terraform state files (contain sensitive data)
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# Terraform lock and modules
+.terraform/
+.terraform.lock.hcl
+
+# Sensitive variable files
+terraform.tfvars
+*.auto.tfvars
+
+# Terragrunt cache files
+.terragrunt-*
+
+# Crash logs
+crash.log
+
+# Override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json

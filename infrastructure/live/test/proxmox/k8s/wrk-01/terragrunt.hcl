@@ -1,5 +1,5 @@
-include "proxmox" {
-  path = "../terragrunt.hcl"
+include "root" {
+  path = find_in_parent_folders("root.hcl")
 }
 
 inputs = {
@@ -18,5 +18,5 @@ inputs = {
   ipv4_cidr = "192.168.10.171/24"
   gateway   = "192.168.10.1"
 
-  ssh_public_key = pathexpand("~/.ssh/id_ed25519.pub")
+  ssh_public_key = file(pathexpand("~/.ssh/id_ed25519.pub"))
 }

@@ -4,7 +4,7 @@ include "root" {
 
 inputs = {
   name           = "k8s-cpl-01"
-  node_name      = "pve01"
+  node_name      = "pvg"
   vm_id          = 2101
   template_vm_id = 105
 

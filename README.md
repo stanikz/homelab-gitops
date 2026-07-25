@@ -11,3 +11,12 @@ homelab-gitops/
 ├── platform/         # ArgoCD bootstrap + OpenBao
 └── applications/     # Everything deployed by ArgoCD
 ```
+
+## Requirements
+Ensure the following tools are installed before running this repository:
+
+```
+* Git
+* OpenTofu
+* Terragrunt (Open source version of Terraform)
+```

@@ -13,34 +13,39 @@ resource "proxmox_virtual_environment_vm" "this" {
 
     cpu {
         cores = var.cpu_cores
-        type = var.cpu_type
+        type  = var.cpu_type
     }
 
     memory {
         dedicated = var.memory_mb
-        floating = var.memory_mb
+        floating  = var.memory_mb
     }
+
+    scsi_hardware = "virtio-scsi-single"
+    boot_order = ["scsi0"]
 
     disk {
         datastore_id = var.datastore_id
-        interface = "virtio0"
-        size = var.disk_size_gb
-        file_format = "raw"
+        interface    = "scsi0"
+        size         = var.disk_size_gb
+        file_format  = "raw"
+        iothread     = true #good for ZFS/SSD
     }
 
     network_device {
         bridge = var.bridge
-        model = "virtio"
+        model  = "virtio"
     }
 
     agent {
         enabled = true
     }
 
-    boot_order = ["virtio0"]
+    
 
     initialization {
         datastore_id = var.initialization_datastore_id
+        
         ip_config {
             ipv4 {
                 address = var.ipv4_cidr
@@ -51,7 +56,7 @@ resource "proxmox_virtual_environment_vm" "this" {
         user_account {
             username = var.username
             password = var.ubuntu_password
-            keys = [trimspace(var.ssh_public_key)]
+            keys     = [trimspace(var.ssh_public_key)]
         }
     }
 }

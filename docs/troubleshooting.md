@@ -1,5 +1,17 @@
 # Troubleshooting
 
+## Creating hash password
+In your terraform.tfvars, the user_password_hash
+needs hash password which can be created by following command:
+
+```
+python3 - <<'PY'
+import getpass, crypt
+pw = getpass.getpass("Password: ")
+print(crypt.crypt(pw, crypt.mksalt(crypt.METHOD_SHA512)))
+PY
+```
+
 ## Cloud-Init snippet upload fails
 
 Example:

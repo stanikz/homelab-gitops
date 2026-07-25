@@ -3,23 +3,23 @@ variable "name" {
 }
 
 variable "node_name" {
-    type = string 
+  type = string
 }
 
 variable "vm_id" {
-    type = number
+  type = number
 }
 
 variable "template_vm_id" {
-    type = number
+  type = number
 }
 
 variable "datastore_id" {
-    type = string
+  type = string
 }
 
 variable "bridge" {
-    type = string
+  type = string
 }
 
 variable "cpu_type" {
@@ -28,18 +28,18 @@ variable "cpu_type" {
 }
 
 variable "cpu_cores" {
-    type = number
-    default = 2
+  type    = number
+  default = 2
 }
 
 variable "memory_mb" {
-    type = number
-    default = 2048
+  type    = number
+  default = 2048
 }
 
 variable "disk_size_gb" {
-    type = number
-    default = 20 
+  type    = number
+  default = 20
 }
 
 variable "initialization_datastore_id" {
@@ -47,9 +47,19 @@ variable "initialization_datastore_id" {
   default = "local-zfs"
 }
 
+variable "snippets_datastore_id" {
+  type    = string
+  default = "local"
+}
+
 variable "keyboard_layout" {
   type    = string
   default = "sv"
+}
+
+variable "timezone" {
+  type    = string
+  default = "Europe/Stockholm"
 }
 
 variable "ipv4_cidr" {
@@ -65,22 +75,21 @@ variable "ssh_public_key" {
 }
 
 variable "username" {
-    type = string
+    type    = string
     default = "ubuntu"
 }
 
-variable "ubuntu_password" {
+variable "user_password_hash" {
   type      = string
   sensitive = true
 }
 
 variable "description" {
-    type = string
+    type    = string
     default = "Managed by OpenTofu!"
 }
 
-
 variable "tags" {
-    type = list(string)
+    type    = list(string)
     default = ["terraform", "kubernetes"]
 }

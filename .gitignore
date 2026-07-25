@@ -12,7 +12,8 @@ terraform.tfvars
 *.auto.tfvars
 
 # Terragrunt cache files
-.terragrunt-*
+.terragrunt.lock.hcl
+.terragrunt-cache
 
 # Crash logs
 crash.log

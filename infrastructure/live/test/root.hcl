@@ -3,6 +3,16 @@ locals {
   proxmox_api_token = get_env("PROXMOX_VE_API_TOKEN")
 }
 
+inputs = {
+  bridge                      = "vmbr0"
+  datastore_id                = "local-zfs"
+  initialization_datastore_id = "local-zfs"
+  template_vm_id              = 5000 #Template must exist in PROXMOX
+
+  cpu_type        = "x86-64-v2-AES"
+  keyboard_layout = "sv"
+}
+
 terraform {
   source = "${get_repo_root()}/infrastructure/modules/proxmox-vm"
 

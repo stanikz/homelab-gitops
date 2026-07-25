@@ -6,10 +6,6 @@ inputs = {
   name           = "k8s-cpl-01"
   node_name      = "pvg"
   vm_id          = 1000
-  template_vm_id = 5000
-
-  datastore_id = "local-zfs"
-  bridge       = "vmbr0"
 
   cpu_cores    = 1
   memory_mb    = 2048

@@ -55,6 +55,11 @@ resource "proxmox_virtual_environment_vm" "this" {
   initialization {
     datastore_id = var.initialization_datastore_id
 
+    dns {
+      servers = var.dns_servers
+      domain  = var.dns_search_domain
+    }
+
     ip_config {
       ipv4 {
         address = var.ipv4_cidr

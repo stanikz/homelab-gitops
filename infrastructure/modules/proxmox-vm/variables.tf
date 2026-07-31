@@ -70,6 +70,16 @@ variable "gateway" {
     type = string
 }
 
+variable "dns_servers" {
+  description = "DNS servers configured through Cloud-Init"
+  type        = list(string)
+}
+
+variable "dns_search_domain" {
+  description = "DNS search domain configured through Cloud-Init"
+  type        = string
+}
+
 variable "ssh_public_key" {
     type = string
 }

@@ -19,14 +19,39 @@ users:
       - ${ssh_public_key}
 
 packages:
+  # proxmox integration
   - qemu-guest-agent
-  - containerd
+
+  # Package repositories and API access
   - curl
   - ca-certificates
-  - vim
-  - htop
+  - gnupg
+
+  # Data and certificate inspection
+  - jq
+  - openssl
+
+  # Basic network diagnostics
+  - netcat-openbsd 
+  - iputils-ping
+  - bind9-dnsutils
+  - iproute2
+  - iptables 
+
+  # Kubernetes and container networking diagnostics
+  - conntrack
+  - socat 
+  - ethtool
+
+  # General troublshooting and
+  - lsof
+  - tcpdump
   - bash-completion
 
+  # Optional 
+  - vim
+  - htop
+  
 write_files:
   - path: /etc/modules-load.d/k8s.conf
     permissions: "0644"

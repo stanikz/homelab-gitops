@@ -8,6 +8,8 @@ inputs = {
   datastore_id                = "local-zfs"
   initialization_datastore_id = "local-zfs"
   template_vm_id              = 5000 #Template must exist in PROXMOX
+  dns_servers                 = ["192.168.10.151"] #Change this to your DNS server @home
+  dns_search_domain           = "home" #this can be specific to your internal DNS @home
 
   cpu_type        = "x86-64-v2-AES"
   keyboard_layout = "sv"

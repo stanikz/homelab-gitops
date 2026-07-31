@@ -21,7 +21,6 @@ Current responsibilities:
 - User creation
 - SSH keys
 - Password hash (You need to create or set your hash password under terraform.tfvars and make sure its in .gitignore)
-- Containerd installation
 - Kernel modules
 - sysctl configuration
 - Swap removal

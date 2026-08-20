@@ -3,6 +3,26 @@ locals {
   proxmox_api_token = get_env("PROXMOX_VE_API_TOKEN")
 }
 
+remote_state {
+  backend = "s3"
+
+  config = {
+    bucket = "tofu-state"
+    key    = "${path_relative_to_include()}/terraform.tfstate"
+
+    region = "us-east-1"
+
+    endpoints = {
+      s3 = "http://192.168.10.127:9000"
+    }
+
+    use_path_style = true
+    use_lockfile   = true
+    
+    skip_credentials_validation = true
+  }
+}
+
 inputs = {
   bridge                      = "vmbr0"
   datastore_id                = "local-zfs"

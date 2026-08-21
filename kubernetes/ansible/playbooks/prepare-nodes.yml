@@ -6,3 +6,4 @@
 
   roles:
     - k8s_prereq #this is named after the roles/k8s_prereq folder!
+    - containerd

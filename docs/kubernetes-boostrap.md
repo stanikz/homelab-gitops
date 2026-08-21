@@ -32,7 +32,7 @@ later phase.
 * [x] DNS configuration
 * [x] Ansible connectivity
 * [x] Kubernetes node prerequisites
-* [ ] containerd installation and configuration
+* [x] containerd installation and configuration
 * [ ] Kubernetes package installation
 * [ ] kubeadm control-plane initialization
 * [ ] Worker node join
@@ -147,7 +147,7 @@ control plane is initialized.
 | Setting                               | Value                             |
 | ------------------------------------- | --------------------------------- |
 | Kubernetes minor version              | `TBD`                             |
-| containerd version or package source  | `TBD`                             |
+| containerd version or package source  | `2.2.1-0ubuntu1~24.04.3`          |
 | Cilium chart version                  | `TBD`                             |
 | Control-plane address                 | `TBD`                             |
 | Control-plane endpoint                | `TBD`                             |
@@ -375,7 +375,7 @@ All three nodes have passed the node preparation validation checks.
 
 ## Stage 2: Install and configure containerd
 
-> **Status:** Not started
+> **Status:** Complete
 
 containerd will be installed and configured on all Kubernetes nodes using
 Ansible.

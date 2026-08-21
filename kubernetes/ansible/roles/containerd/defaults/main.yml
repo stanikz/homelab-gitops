@@ -1,0 +1,3 @@
+---
+containerd_config_path: /etc/containerd/config.toml
+containerd_service_name: containerd

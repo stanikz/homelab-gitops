@@ -11,6 +11,10 @@
 # Credentials are retrieved at runtime and passed to Terragrunt
 # through environment variables. They are not stored in this repository,
 # Terraform/OpenTofu configuration, or state.
+# Usage:
+#   ./scripts/terragrunt-bw.sh run --all plan --working-dir infrastructure/live/test
+#   ./scripts/terragrunt-bw.sh run --all apply --working-dir infrastructure/live/test
+#   ./scripts/terragrunt-bw.sh run --all destroy --working-dir infrastructure/live/test
 
 set -euo pipefail
 

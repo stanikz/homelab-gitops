@@ -1,0 +1,8 @@
+---
+- name: Prepare Kubernetes nodes
+  hosts: kubernetes
+  become: true
+  gather_facts: true
+
+  roles:
+    - k8s_prereq #this is named after the roles/k8s_prereq folder!

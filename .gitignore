@@ -5,7 +5,6 @@
 
 # Terraform lock and modules
 .terraform/
-.terraform.lock.hcl
 
 # Sensitive variable files
 terraform.tfvars

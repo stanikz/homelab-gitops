@@ -10,15 +10,23 @@
 * Terragrunt Bitwarden wrapper script
 * DNS configuration for Kubernetes nodes
 * Common node troubleshooting utilities
+* Ansible inventory and bootstrap automation for Kubernetes nodes
+* Kubernetes node prerequisite role
+* containerd installation and configuration role
+* Pinned containerd version
+* systemd cgroup configuration for containerd
 
 ### Changed
 
 * OpenTofu dependency lock files are now tracked in Git
 * Terraform state is stored remotely instead of in the local Terragrunt cache
+* Kubernetes host preparation is managed with Ansible instead of manual shell steps
 
 ### Planned
 
-* Kubernetes bootstrap with kubeadm
+* Kubernetes package installation (`kubelet`, `kubeadm`, `kubectl`)
+* kubeadm control-plane initialization
+* Worker node join
 * Cilium
 * Argo CD
 * OpenBao

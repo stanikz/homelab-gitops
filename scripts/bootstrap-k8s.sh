@@ -21,6 +21,20 @@ echo "Preparing Kubernetes nodes..."
 
 ansible-playbook playbooks/prepare-nodes.yml
 
+echo
+echo "Refreshing local kubeconfig..."
+
+KUBECONFIG_PATH="${HOME}/.kube/homelab.yaml"
+
+if [[ ! -d "${HOME}/.kube" ]]; then
+  mkdir "${HOME}/.kube"
+fi
+
+scp ubuntu@k8s-cpl-01.home:/home/ubuntu/.kube/config "${KUBECONFIG_PATH}"
+
+export KUBECONFIG="${KUBECONFIG_PATH}"
+
+kubectl get nodes
 
 echo
 echo "Installing Cilium CNI..."

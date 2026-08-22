@@ -1,0 +1,3 @@
+---
+kubernetes_keyring_path: /etc/apt/keyrings/kubernetes-apt-keyring.asc
+kubernetes_repository_path: /etc/apt/sources.list.d/kubernetes.list

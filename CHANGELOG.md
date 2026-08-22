@@ -11,20 +11,25 @@
 * DNS configuration for Kubernetes nodes
 * Common node troubleshooting utilities
 * Ansible inventory and bootstrap automation for Kubernetes nodes
-* Kubernetes node prerequisite role
-* containerd installation and configuration role
-* Pinned containerd version
+* Kubernetes node prerequisite Ansible role
+* containerd installation and configuration Ansible role
+* Pinned containerd package version
 * systemd cgroup configuration for containerd
+* Kubernetes package repository configuration using `pkgs.k8s.io`
+* Kubernetes package installation Ansible role
+* Pinned Kubernetes `1.36.4` packages
+* Automated installation of `kubelet`, `kubeadm`, and `kubectl`
+* Package holds for Kubernetes components
 
 ### Changed
 
 * OpenTofu dependency lock files are now tracked in Git
 * Terraform state is stored remotely instead of in the local Terragrunt cache
 * Kubernetes host preparation is managed with Ansible instead of manual shell steps
+* Kubernetes and container runtime versions are explicitly pinned for reproducible cluster builds
 
 ### Planned
 
-* Kubernetes package installation (`kubelet`, `kubeadm`, `kubectl`)
 * kubeadm control-plane initialization
 * Worker node join
 * Cilium

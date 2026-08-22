@@ -1,0 +1,57 @@
+---
+- name: Ensure APT keyring directory exists
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Download Kubernetes repository signing key
+  ansible.builtin.get_url:
+    url: "https://pkgs.k8s.io/core:/stable:/{{ kubernetes_minor_version }}/deb/Release.key"
+    dest: "{{ kubernetes_keyring_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Configure Kubernetes APT repository
+  ansible.builtin.copy:
+    dest: "{{ kubernetes_repository_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      deb [signed-by={{ kubernetes_keyring_path }}] https://pkgs.k8s.io/core:/stable:/{{ kubernetes_minor_version }}/deb/ /
+  register: kubernetes_repository
+
+- name: Update APT package cache
+  ansible.builtin.apt:
+    update_cache: true
+  when: kubernetes_repository.changed
+
+- name: Install pinned Kubernetes packages
+  ansible.builtin.apt:
+    name:
+      - "kubelet={{ kubernetes_package_version }}"
+      - "kubeadm={{ kubernetes_package_version }}"
+      - "kubectl={{ kubernetes_package_version }}"
+    state: present
+    update_cache: true
+  when: not ansible_check_mode
+
+- name: Hold Kubernetes packages
+  ansible.builtin.dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  loop:
+    - kubelet
+    - kubeadm
+    - kubectl
+  when: not ansible_check_mode
+
+- name: Ensure kubelet is enabled
+  ansible.builtin.systemd_service:
+    name: kubelet
+    enabled: true
+  when: not ansible_check_mode

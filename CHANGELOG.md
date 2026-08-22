@@ -28,6 +28,7 @@
 * Idempotent worker join validation using `/etc/kubernetes/kubelet.conf`
 * Kubernetes bootstrap wrapper script with Ansible connectivity validation
 * Automatic SSH known-host refresh for rebuildable Kubernetes nodes
+* Validated end-to-end Kubernetes bootstrap after a clean VM rebuild
 
 ### Changed
 
@@ -40,7 +41,6 @@
 
 ### Planned
 
-* Clean end-to-end Kubernetes bootstrap validation after VM rebuild
 * Cilium
 * Cluster networking validation
 * Argo CD

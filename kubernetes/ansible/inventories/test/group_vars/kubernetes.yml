@@ -1,0 +1,18 @@
+---
+containerd_version: "2.2.1-0ubuntu1~24.04.3"
+
+kubernetes_minor_version: "v1.36"
+kubernetes_package_version: "1.36.4-1.1"
+
+kubernetes_api_port: 6443
+kubernetes_control_plane_ip: "192.168.10.170"
+kubernetes_control_plane_endpoint: "k8s-cpl-01.home:6443"
+
+kubernetes_service_subnet: "10.96.0.0/12"
+kubernetes_pod_subnet: "10.244.0.0/16"
+kubernetes_dns_domain: "cluster.local"
+
+containerd_cri_socket: "unix:///run/containerd/containerd.sock"
+
+kubernetes_admin_user: "ubuntu"
+#kubernetes_cluster_name: "homelab-k8s"

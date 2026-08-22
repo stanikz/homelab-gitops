@@ -1,0 +1,23 @@
+# roles/kubeadm_control_plane/templates/kubeadm-config.yaml.j2
+apiVersion: kubeadm.k8s.io/v1beta4
+kind: InitConfiguration
+
+localAPIEndpoint:
+  advertiseAddress: "{{ kubernetes_control_plane_ip }}"
+  bindPort: {{ kubernetes_api_port }}
+
+nodeRegistration:
+  name: "{{ inventory_hostname }}"
+  criSocket: "{{ containerd_cri_socket }}"
+
+---
+apiVersion: kubeadm.k8s.io/v1beta4
+kind: ClusterConfiguration
+
+kubernetesVersion: "v{{ kubernetes_package_version.split('-')[0] }}"
+controlPlaneEndpoint: "{{ kubernetes_control_plane_endpoint }}"
+
+networking:
+  serviceSubnet: "{{ kubernetes_service_subnet }}"
+  podSubnet: "{{ kubernetes_pod_subnet }}"
+  dnsDomain: "{{ kubernetes_dns_domain }}"

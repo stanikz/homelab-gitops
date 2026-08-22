@@ -1,13 +1,25 @@
 # TODO
 
-## Cloud-Init
-- [ ] Install kubeadm
-- [ ] Install kubectl
-- [ ] Configure containerd
+## Kubernetes Bootstrap
 
-## Kubernetes
-- [ ] Bootstrap control plane
-- [ ] Join workers
+* [x] Configure Kubernetes node prerequisites with Ansible
+* [x] Install and configure containerd
+* [x] Install pinned `kubelet`, `kubeadm`, and `kubectl`
+* [x] Bootstrap control plane
+* [x] Automate worker node join
+* [ ] Install Cilium
+* [ ] Validate cluster networking
+* [ ] Validate CoreDNS
+* [ ] Validate Kubernetes API readiness
+* [ ] Test complete bootstrap after clean VM rebuild
 
-## GitOps
-- [ ] Install ArgoCD
+## GitOps Platform
+
+* [ ] Install Argo CD
+* [ ] Configure Git reconciliation
+* [ ] Install OpenBao
+
+## Platform
+
+* [ ] Monitoring
+* [ ] Logging

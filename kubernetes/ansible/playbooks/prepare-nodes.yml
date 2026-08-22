@@ -4,6 +4,21 @@
   become: true
   gather_facts: true
 
+  pre_tasks:
+  - name: Wait for Cloud-Init to finish
+    ansible.builtin.command:
+      cmd: cloud-init status --wait
+    changed_when: false
+
+  - name: Wait for apt and dpkg locks to be released
+    ansible.builtin.shell: |
+      while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 \
+         || fuser /var/lib/dpkg/lock >/dev/null 2>&1 \
+         || fuser /var/cache/apt/archives/lock >/dev/null 2>&1; do
+        sleep 2
+      done
+    changed_when: false
+
   roles:
     - k8s_prereq #this is named after the roles/k8s_prereq folder!
     - containerd

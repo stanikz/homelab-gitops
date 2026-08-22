@@ -23,6 +23,9 @@
 * kubeadm control-plane configuration and validation
 * Automated kubeadm control-plane initialization
 * Administrative kubeconfig provisioning for the control-plane user
+* Automated Kubernetes worker-node join
+* Runtime generation of short-lived kubeadm join tokens
+* Idempotent worker join validation using `/etc/kubernetes/kubelet.conf`
 
 ### Changed
 
@@ -34,8 +37,8 @@
 
 ### Planned
 
-* Worker node join
 * Cilium
+* Cluster networking validation
 * Argo CD
 * OpenBao
 

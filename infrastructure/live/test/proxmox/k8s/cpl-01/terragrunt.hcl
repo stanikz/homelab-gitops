@@ -7,7 +7,7 @@ inputs = {
   node_name      = "pvg"
   vm_id          = 1000
 
-  cpu_cores    = 1
+  cpu_cores    = 2 #HW requirement (2vCPU) by kubeadm for control-plane node 
   memory_mb    = 2048
   disk_size_gb = 40
 

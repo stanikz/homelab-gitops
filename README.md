@@ -70,7 +70,7 @@ Cloud-Init is responsible for the generic Ubuntu baseline, while Ansible manages
 | Credential Management | Bitwarden CLI |
 | Kubernetes | kubeadm `v1.36.4` |
 | Container Runtime | containerd `2.2.1` |
-| Networking | Cilium **(planned)** |
+| Networking | Cilium `1.20.1` (Helm Chart)|
 | GitOps | Argo CD **(planned)** |
 | Secrets Management | OpenBao **(planned)** |
 
@@ -88,6 +88,7 @@ homelab-gitops/
 │
 ├── docs/
 │   ├── architecture.md
+│   ├── cilium.md
 │   ├── cloud-init.md
 │   ├── kubernetes-bootstrap.md
 │   ├── proxmox-template.md
@@ -133,6 +134,7 @@ Install the following software before using this repository:
 * OpenSSH
 * Bitwarden CLI
 * jq
+* Helm
 
 ---
 
@@ -332,6 +334,44 @@ From the repository root:
 ./scripts/refresh-k8s-known-hosts.sh
 ```
 
+## Install Cilium
+
+After the kubeadm bootstrap completes, the Kubernetes nodes are expected to
+remain in the `NotReady` state until a CNI plugin is installed.
+
+Cilium is installed with Ansible using the official Cilium Helm chart.
+
+From the repository root:
+
+```bash
+cd kubernetes/ansible
+ansible-playbook playbooks/install-cilium.yml
+```
+
+The playbook:
+
+* Adds the official Cilium Helm repository.
+* Installs or upgrades Cilium with Helm.
+* Waits for the Cilium DaemonSet rollout.
+* Waits for the Cilium operator rollout.
+* Waits for all Kubernetes nodes to become `Ready`.
+* Validates CoreDNS.
+
+Validate the cluster:
+
+```bash
+kubectl get nodes -o wide
+kubectl -n kube-system get pods -o wide
+```
+
+Expected result:
+
+```text
+k8s-cpl-01   Ready
+k8s-wrk-01   Ready
+k8s-wrk-02   Ready
+```
+
 ## Destroy the infrastructure
 
 From the repository root, run:
@@ -390,7 +430,11 @@ From the repository root, run:
 * Automatic SSH host-key refresh after Kubernetes VM rebuilds
 * Kubernetes bootstrap wrapper with Ansible connectivity validation
 * Common node troubleshooting utilities
-
+* Cilium installation using Ansible and Helm
+* Cilium DaemonSet rollout validation
+* Cilium operator rollout validation
+* Kubernetes node readiness validation after CNI installation
+* CoreDNS validation after Cilium installation
 ---
 
 # Current Kubernetes Cluster
@@ -409,11 +453,13 @@ Kubernetes API endpoint:
 https://k8s-cpl-01.home:6443
 ```
 
-Cluster networking is not yet configured.
+Cluster networking is provided by Cilium.
 
-Until Cilium is installed, the nodes are expected to remain in the `NotReady`
-state. This is expected after a successful kubeadm bootstrap because no
-Container Network Interface (CNI) plugin has been installed yet.
+Cilium is installed with Ansible using the official Helm chart. The current
+installation keeps kube-proxy enabled.
+
+After Cilium installation, all Kubernetes nodes are expected to reach the
+`Ready` state and CoreDNS is expected to run successfully.
 
 ---
 
@@ -437,8 +483,8 @@ Container Network Interface (CNI) plugin has been installed yet.
 * [x] kubeadm control-plane bootstrap
 * [x] Worker node join
 * [x] Automated bootstrap entry point
-* [ ] Clean rebuild validation
-* [ ] Cilium
+* [x] Clean rebuild validation
+* [x] Cilium
 * [ ] Cluster validation
 
 ## Stage 3 — GitOps Platform
@@ -577,5 +623,6 @@ The current Kubernetes cluster has completed the kubeadm bootstrap stage.
 The complete infrastructure and Kubernetes bootstrap has been successfully
 validated from a clean VM rebuild without requiring manual configuration of the Kubernetes nodes.
 
-The next implementation milestone is installing Cilium and validating cluster
-networking, CoreDNS, Kubernetes API readiness and node readiness.
+Cilium has been installed using Ansible and Helm. The cluster has been validated with all nodes in the `Ready` state and CoreDNS running successfully.
+
+The next implementation milestone is the GitOps platform, starting with Argo CD.

@@ -1,0 +1,68 @@
+---
+- name: Add Cilium Helm repository
+  ansible.builtin.command:
+    cmd: helm repo add {{ cilium_helm_repo_name }} {{ cilium_helm_repo_url }}
+  register: cilium_helm_repo_add
+  changed_when: "'has been added' in cilium_helm_repo_add.stdout"
+  failed_when:
+    - cilium_helm_repo_add.rc != 0
+    - "'already exists' not in cilium_helm_repo_add.stderr"
+  become: false
+
+- name: Update Helm repositories
+  ansible.builtin.command:
+    cmd: helm repo update
+  changed_when: false
+  become: false
+
+- name: Install or upgrade Cilium
+  ansible.builtin.command:
+    cmd: >
+      helm upgrade --install {{ cilium_release_name }} {{ cilium_helm_repo_name }}/cilium
+      --version {{ cilium_chart_version }}
+      --namespace {{ cilium_namespace }}
+      --set kubeProxyReplacement=false
+  register: cilium_helm_install
+  changed_when:
+    - "'has been upgraded' in cilium_helm_install.stdout or 'has been installed' in cilium_helm_install.stdout"
+  become: false
+
+- name: Wait for Cilium DaemonSet rollout
+  ansible.builtin.command:
+    cmd: kubectl -n {{ cilium_namespace }} rollout status ds/cilium --timeout=5m
+  changed_when: false
+  become: false
+
+- name: Wait for Cilium operator rollout
+  ansible.builtin.command:
+    cmd: kubectl -n {{ cilium_namespace }} rollout status deployment/cilium-operator --timeout=5m
+  changed_when: false
+  become: false
+
+- name: Wait for Kubernetes nodes to become Ready
+  ansible.builtin.command:
+    cmd: kubectl wait nodes --all --for=condition=Ready --timeout=5m
+  changed_when: false
+  become: false
+
+- name: Check CoreDNS rollout
+  ansible.builtin.command:
+    cmd: kubectl -n kube-system rollout status deployment/coredns --timeout=30s
+  register: coredns_rollout_initial
+  changed_when: false
+  failed_when: false
+  become: false
+
+- name: Restart CoreDNS after Cilium installation if rollout is unhealthy
+  ansible.builtin.command:
+    cmd: kubectl -n kube-system rollout restart deployment/coredns
+  register: coredns_restart
+  changed_when: "'restarted' in coredns_restart.stdout"
+  when: coredns_rollout_initial.rc != 0
+  become: false
+
+- name: Wait for CoreDNS rollout
+  ansible.builtin.command:
+    cmd: kubectl -n kube-system rollout status deployment/coredns --timeout=5m
+  changed_when: false
+  become: false

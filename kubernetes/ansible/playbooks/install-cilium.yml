@@ -1,0 +1,14 @@
+---
+- name: Install Cilium CNI
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  become: false
+
+  vars:
+    ansible_become: false
+
+# Cilium is installed from the admin workstation using the current
+# local kubectl context and the local Helm binary.
+  roles:
+    - cilium

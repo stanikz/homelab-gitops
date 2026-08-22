@@ -29,6 +29,12 @@
 * Kubernetes bootstrap wrapper script with Ansible connectivity validation
 * Automatic SSH known-host refresh for rebuildable Kubernetes nodes
 * Validated end-to-end Kubernetes bootstrap after a clean VM rebuild
+* Cilium installation using Ansible and Helm
+* Cilium role for Kubernetes CNI installation
+* Dedicated Cilium installation playbook
+* Kubernetes node readiness validation after CNI installation
+* CoreDNS validation after Cilium installation
+* Conditional CoreDNS restart handling after Cilium installation
 
 ### Changed
 
@@ -41,8 +47,10 @@
 
 ### Planned
 
-* Cilium
-* Cluster networking validation
+* Improve Cilium Helm idempotency with Ansible Helm module
+* Evaluate Hubble
+* Evaluate Cilium kube-proxy replacement
+* GitOps-managed Cilium installation
 * Argo CD
 * OpenBao
 

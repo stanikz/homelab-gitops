@@ -21,5 +21,11 @@ echo "Preparing Kubernetes nodes..."
 
 ansible-playbook playbooks/prepare-nodes.yml
 
+
+echo
+echo "Installing Cilium CNI..."
+
+ansible-playbook playbooks/install-cilium.yml
+
 echo
 echo "Kubernetes node preparation completed successfully."

@@ -1,0 +1,6 @@
+# Generate with:
+#   openssl passwd -6
+#
+# Copy this file to terraform.tfvars and replace the placeholder.
+
+user_password_hash = "<SHA-512-password-hash>"

@@ -50,11 +50,9 @@ configuration management and GitOps principles.
 
 Infrastructure state is stored remotely in an S3-compatible RustFS bucket.
 
-Backend credentials are retrieved from Bitwarden at runtime and are not stored
-in the repository.
+Backend credentials are retrieved from Bitwarden at runtime and are not stored in the repository.
 
-Cloud-Init is responsible for the generic Ubuntu baseline, while Ansible manages
-Kubernetes-specific host configuration and cluster bootstrap.
+Cloud-Init is responsible for the generic Ubuntu baseline, while Ansible manages Kubernetes-specific host configuration and cluster bootstrap.
 
 ---
 
@@ -237,6 +235,16 @@ export PROXMOX_VE_API_TOKEN="user@realm!terraform=xxxxxxxx-xxxx-xxxx-xxxx"
 
 ```bash
 ssh-add ~/.ssh/id_ed25519
+```
+
+## Configure Cloud-Init User Password
+
+The Cloud-Init user password is provided to OpenTofu as a SHA-512 password hash.
+
+Generate a password hash:
+
+```bash
+openssl passwd -6
 ```
 
 ## Unlock Bitwarden
@@ -566,7 +574,8 @@ The recommended Kubernetes bootstrap entry point is:
 
 The current Kubernetes cluster has completed the kubeadm bootstrap stage.
 
-The next validation milestone is proving the complete infrastructure and
-Kubernetes bootstrap from a clean VM rebuild. After that, the next implementation
-milestone is installing Cilium and validating cluster networking, CoreDNS,
-Kubernetes API readiness and node readiness.
+The complete infrastructure and Kubernetes bootstrap has been successfully
+validated from a clean VM rebuild without requiring manual configuration of the Kubernetes nodes.
+
+The next implementation milestone is installing Cilium and validating cluster
+networking, CoreDNS, Kubernetes API readiness and node readiness.

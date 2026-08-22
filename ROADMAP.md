@@ -17,6 +17,7 @@
 * [x] kubeadm control-plane bootstrap
 * [x] Worker node join
 * [x] Automated bootstrap entry point
+* [x] Local kubeconfig refresh after rebuild
 * [x] Clean rebuild validation
 * [x] Cilium
 * [x] Cluster validation

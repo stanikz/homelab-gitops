@@ -93,13 +93,25 @@ kubectl -n kube-system get ds kube-proxy
 
 In the current cluster, kube-proxy is enabled and runs on all Kubernetes nodes.
 
-## Install Cilium
+## Local Kubeconfig Refresh
 
-From the Ansible directory:
+After a clean cluster rebuild, the local kubeconfig must be refreshed before
+installing Cilium.
+
+The kubeconfig contains the Kubernetes cluster certificate authority. Because a new kubeadm cluster generates a new certificate authority, an old kubeconfig from a previous cluster rebuild will fail TLS verification against the new API server.
+
+The main bootstrap script handles this automatically by copying the kubeconfig from the control-plane node after kubeadm initialization and before Cilium installation.
 
 ```bash
-cd kubernetes/ansible
-ansible-playbook playbooks/install-cilium.yml
+scp ubuntu@k8s-cpl-01.home:/home/ubuntu/.kube/config ~/.kube/homelab.yaml
+```
+
+## Install Cilium
+
+Cilium is installed automatically as part of the main Kubernetes bootstrap flow:
+
+```bash
+./scripts/bootstrap-k8s.sh
 ```
 
 ## Validate Cilium

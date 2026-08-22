@@ -277,12 +277,14 @@ From the repository root, run:
 ./scripts/bootstrap-k8s.sh
 ```
 
-The bootstrap wrapper performs the local orchestration required to start the
-Kubernetes configuration process:
+The bootstrap wrapper performs the local orchestration required to configure the Kubernetes cluster:
 
 1. Refreshes SSH host keys for the Kubernetes nodes.
 2. Verifies Ansible connectivity.
 3. Runs the Kubernetes bootstrap playbook.
+4. Refreshes the local kubeconfig from the newly initialized control-plane node.
+5. Installs Cilium as the cluster CNI.
+6. Validates Cilium, node readiness and CoreDNS.
 
 The Ansible automation then:
 
@@ -293,6 +295,9 @@ The Ansible automation then:
 * Provisions the administrative kubeconfig.
 * Generates short-lived kubeadm join credentials.
 * Joins worker nodes to the cluster.
+* Installs Cilium with Helm.
+* Waits for all Kubernetes nodes to become Ready.
+* Validates CoreDNS.
 
 The bootstrap script is the recommended entry point after provisioning or
 rebuilding the Kubernetes virtual machines.
@@ -334,14 +339,12 @@ From the repository root:
 ./scripts/refresh-k8s-known-hosts.sh
 ```
 
-## Install Cilium
+## Install Cilium separately
 
-After the kubeadm bootstrap completes, the Kubernetes nodes are expected to
-remain in the `NotReady` state until a CNI plugin is installed.
+Cilium is installed automatically by `scripts/bootstrap-k8s.sh`.
 
-Cilium is installed with Ansible using the official Cilium Helm chart.
-
-From the repository root:
+For development or troubleshooting, the Cilium playbook can also be executed
+directly after the kubeadm bootstrap has completed and the local kubeconfig has been refreshed:
 
 ```bash
 cd kubernetes/ansible
@@ -430,6 +433,7 @@ From the repository root, run:
 * Automatic SSH host-key refresh after Kubernetes VM rebuilds
 * Kubernetes bootstrap wrapper with Ansible connectivity validation
 * Common node troubleshooting utilities
+* Local kubeconfig refresh after kubeadm cluster rebuilds
 * Cilium installation using Ansible and Helm
 * Cilium DaemonSet rollout validation
 * Cilium operator rollout validation
@@ -566,10 +570,11 @@ provider versions and checksums remain reproducible.
 
 The Kubernetes bootstrap is designed to be repeatable after infrastructure
 rebuilds. The `bootstrap-k8s.sh` entry point refreshes SSH host keys before
-running Ansible so that recreated virtual machines using the same hostnames and
-addresses can be configured without retaining stale SSH host-key entries.
+running Ansible so that recreated virtual machines using the same hostnames and addresses can be configured without retaining stale SSH host-key entries.
 
-A complete clean rebuild test remains part of the current validation work.
+After a clean cluster rebuild, the local kubeconfig is refreshed from the
+control-plane node before installing Cilium. This is required because kubeadm
+generates a new Kubernetes certificate authority for the rebuilt cluster, and an old kubeconfig from a previous cluster will fail TLS verification against the new API server.
 
 ---
 

@@ -15,7 +15,7 @@
 * [x] containerd
 * [x] Kubernetes packages
 * [x] kubeadm control-plane bootstrap
-* [ ] Worker node join
+* [x] Worker node join
 * [ ] Cilium
 * [ ] Cluster validation
 

@@ -6,7 +6,7 @@
 * [x] Install and configure containerd
 * [x] Install pinned `kubelet`, `kubeadm`, and `kubectl`
 * [x] Bootstrap control plane
-* [ ] Automate worker node join
+* [x] Automate worker node join
 * [ ] Install Cilium
 * [ ] Validate cluster networking
 * [ ] Validate CoreDNS

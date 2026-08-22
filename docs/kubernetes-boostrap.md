@@ -34,7 +34,7 @@ later phase.
 * [x] containerd installation and configuration
 * [x] Kubernetes package installation
 * [x] kubeadm control-plane initialization
-* [ ] Worker node join
+* [x] Worker node join
 * [ ] Cilium installation
 * [ ] Cluster validation
 
@@ -380,33 +380,89 @@ CoreDNS remains `Pending` until cluster networking is installed.
 
 The `NotReady` control-plane state is expected until Cilium is available.
 
+
 ## Stage 6: Join worker nodes
 
-> **Status:** Not started
+> **Status:** Complete
 
-The following nodes will join the cluster as workers:
+The worker nodes are joined to the cluster automatically with Ansible.
+
+The worker role is located at:
 
 ```text
-k8s-wrk-01
-k8s-wrk-02
+kubernetes/ansible/roles/kubeadm_worker/
+````
+
+The control plane generates a short-lived kubeadm join command using:
+
+```bash
+kubeadm token create --print-join-command
 ```
 
-Worker registration will be automated with Ansible.
+The generated command is stored only in Ansible runtime memory and is not written to Git or a persistent file.
 
-The join process must:
-
-* generate a short-lived kubeadm bootstrap token
-* avoid storing the complete join command in Git
-* run `kubeadm join` only on nodes that are not already registered
-* remain safe to run repeatedly
-
-The presence of:
+The worker role checks for:
 
 ```text
 /etc/kubernetes/kubelet.conf
 ```
 
-will be used to determine whether a worker is already joined.
+before attempting to join a node. If the file already exists, the worker is considered joined and `kubeadm join` is skipped.
+
+The following nodes have joined the cluster:
+
+* `k8s-wrk-01`
+* `k8s-wrk-02`
+
+### Validation
+
+Verify cluster membership from the control plane:
+
+```bash
+kubectl get nodes -o wide
+```
+
+At this stage, before Cilium is installed, the expected state is:
+
+```text
+k8s-cpl-01   NotReady   control-plane
+k8s-wrk-01   NotReady   <none>
+k8s-wrk-02   NotReady   <none>
+```
+
+All three nodes are registered with the Kubernetes API.
+
+The `NotReady` state is expected until the cluster CNI is installed.
+
+## Definition of done
+
+The Kubernetes bootstrap phase is complete when:
+
+* [x] Kubernetes node prerequisites are automated with Ansible
+* [x] Swap is disabled
+* [x] Required kernel modules are configured
+* [x] Required sysctl values are configured
+* [x] containerd is installed and configured on every node
+* [x] containerd uses `SystemdCgroup = true`
+* [x] containerd package version is explicitly pinned
+* [x] Kubernetes package versions are explicitly pinned
+* [x] `kubelet`, `kubeadm`, and `kubectl` are installed on every node
+* [x] Kubernetes packages are held against unintended upgrades
+* [x] kubeadm configuration is generated and validated
+* [x] `k8s-cpl-01` is initialized with kubeadm
+* [x] Administrative kubeconfig is configured
+* [x] Kubernetes control-plane components are running
+* [x] `k8s-wrk-01` has joined the cluster
+* [x] `k8s-wrk-02` has joined the cluster
+* [ ] Cilium is installed with a pinned version
+* [ ] All three nodes report `Ready`
+* [ ] CoreDNS is healthy
+* [ ] Cilium reports a healthy status
+* [ ] Cilium connectivity tests pass
+* [ ] Kubernetes API readiness checks pass
+* [ ] No bootstrap credentials are stored in Git
+* [ ] The bootstrap process has been tested after a clean rebuild
+* [ ] Repository documentation reflects the completed implementation
 
 ## Stage 7: Install Cilium
 

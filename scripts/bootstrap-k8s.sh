@@ -17,9 +17,9 @@ cd "${ANSIBLE_DIR}"
 ansible kubernetes -m ping
 
 echo
-echo "Bootstrapping Kubernetes cluster..."
+echo "Preparing Kubernetes nodes..."
 
 ansible-playbook playbooks/prepare-nodes.yml
 
 echo
-echo "Kubernetes bootstrap completed successfully."
+echo "Kubernetes node preparation completed successfully."

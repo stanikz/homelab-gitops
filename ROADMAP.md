@@ -16,6 +16,8 @@
 * [x] Kubernetes packages
 * [x] kubeadm control-plane bootstrap
 * [x] Worker node join
+* [x] Automated bootstrap entry point
+* [x] Clean rebuild validation
 * [ ] Cilium
 * [ ] Cluster validation
 

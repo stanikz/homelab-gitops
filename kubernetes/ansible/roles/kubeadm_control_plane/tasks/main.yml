@@ -1,0 +1,68 @@
+# roles/kubeadm_control_plane/tasks/main.yml
+---
+- name: Ensure Kubernetes configuration directory exists
+  ansible.builtin.file:
+    path: /etc/kubernetes
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Render kubeadm configuration
+  ansible.builtin.template:
+    src: kubeadm-config.yaml.j2
+    dest: /etc/kubernetes/kubeadm-config.yaml
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Validate kubeadm configuration
+  ansible.builtin.command:
+    cmd: kubeadm config validate --config /etc/kubernetes/kubeadm-config.yaml
+  changed_when: false
+
+- name: Validate kubeadm configuration
+  ansible.builtin.command:
+    cmd: kubeadm config validate --config /etc/kubernetes/kubeadm-config.yaml
+  changed_when: false
+
+- name: Check whether control plane is already initialized
+  ansible.builtin.stat:
+    path: /etc/kubernetes/admin.conf
+  register: kubeadm_admin_conf
+
+- name: Initialize Kubernetes control plane
+  ansible.builtin.command:
+    cmd: kubeadm init --config /etc/kubernetes/kubeadm-config.yaml
+  when: not kubeadm_admin_conf.stat.exists
+  register: kubeadm_init
+  changed_when: kubeadm_init.rc == 0
+
+# Check for kubeconfig and add that 
+- name: Check for admin kubeconfig
+  ansible.builtin.stat:
+    path: /etc/kubernetes/admin.conf
+  register: kubeadm_admin_conf_after
+
+- name: Ensure admin kubeconfig directory exists
+  ansible.builtin.file:
+    path: "/home/{{ kubernetes_admin_user }}/.kube"
+    state: directory
+    owner: "{{ kubernetes_admin_user }}"
+    group: "{{ kubernetes_admin_user }}"
+    mode: "0700"
+  when:
+    - not ansible_check_mode
+    - kubeadm_admin_conf_after.stat.exists
+
+- name: Install admin kubeconfig
+  ansible.builtin.copy:
+    src: /etc/kubernetes/admin.conf
+    dest: "/home/{{ kubernetes_admin_user }}/.kube/config"
+    remote_src: true
+    owner: "{{ kubernetes_admin_user }}"
+    group: "{{ kubernetes_admin_user }}"
+    mode: "0600"
+  when:
+    - not ansible_check_mode
+    - kubeadm_admin_conf_after.stat.exists

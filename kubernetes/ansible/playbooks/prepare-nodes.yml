@@ -1,0 +1,46 @@
+---
+- name: Prepare Kubernetes nodes
+  hosts: kubernetes
+  become: true
+  gather_facts: true
+
+  roles:
+    - k8s_prereq #this is named after the roles/k8s_prereq folder!
+    - containerd
+    - k8s_packages
+  
+- name: Configure kubeadm control plane
+  hosts: control_plane
+  become: true
+  gather_facts: true
+
+  roles:
+    - kubeadm_control_plane
+
+- name: Generate worker join command
+  hosts: control_plane
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Generate kubeadm worker join command
+      ansible.builtin.command:
+        cmd: kubeadm token create --print-join-command
+      register: kubeadm_join_command
+      changed_when: false
+      no_log: true
+    
+    # The set_fact + no_log makes sure that the join command remains
+    # only in Ansible runtime memory and not written to Git or a file.
+    - name: Store join command for worker play
+      ansible.builtin.set_fact:
+        kubernetes_join_command: "{{ kubeadm_join_command.stdout }}"
+      no_log: true
+
+- name: Join Kubernetes workers
+  hosts: workers
+  become: true
+  gather_facts: true
+
+  roles:
+    - kubeadm_worker

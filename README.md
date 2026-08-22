@@ -50,9 +50,11 @@ configuration management and GitOps principles.
 
 Infrastructure state is stored remotely in an S3-compatible RustFS bucket.
 
-Backend credentials are retrieved from Bitwarden at runtime and are not stored in the repository.
+Backend credentials are retrieved from Bitwarden at runtime and are not stored
+in the repository.
 
-Cloud-Init is responsible for the generic Ubuntu baseline, while Ansible manages Kubernetes-specific host configuration and cluster bootstrap.
+Cloud-Init is responsible for the generic Ubuntu baseline, while Ansible manages
+Kubernetes-specific host configuration and cluster bootstrap.
 
 ---
 
@@ -70,9 +72,9 @@ Cloud-Init is responsible for the generic Ubuntu baseline, while Ansible manages
 | Credential Management | Bitwarden CLI |
 | Kubernetes | kubeadm `v1.36.4` |
 | Container Runtime | containerd `2.2.1` |
-| Networking | Cilium *(planned)* |
-| GitOps | Argo CD *(planned)* |
-| Secrets Management | OpenBao *(planned)* |
+| Networking | Cilium **(planned)** |
+| GitOps | Argo CD **(planned)** |
+| Secrets Management | OpenBao **(planned)** |
 
 ---
 
@@ -111,7 +113,10 @@ homelab-gitops/
 │           ├── kubeadm_control_plane/
 │           └── kubeadm_worker/
 │
-└── scripts/                 # Local automation and helper scripts
+└── scripts/
+    ├── bootstrap-k8s.sh             # Kubernetes bootstrap entry point
+    ├── refresh-k8s-known-hosts.sh   # Refresh SSH host keys after VM rebuilds
+    └── terragrunt-bw.sh             # Terragrunt wrapper with Bitwarden credentials
 ```
 
 Future platform and application directories will be added when those stages are
@@ -195,6 +200,12 @@ Export the returned session:
 export BW_SESSION="<session-token>"
 ```
 
+Alternatively:
+
+```bash
+export BW_SESSION="$(bw unlock --raw)"
+```
+
 The wrapper retrieves the RustFS credentials and exposes them to OpenTofu as:
 
 ```text
@@ -250,6 +261,37 @@ export BW_SESSION="$(bw unlock --raw)"
 
 ## Bootstrap Kubernetes
 
+From the repository root, run:
+
+```bash
+./scripts/bootstrap-k8s.sh
+```
+
+The bootstrap wrapper performs the local orchestration required to start the
+Kubernetes configuration process:
+
+1. Refreshes SSH host keys for the Kubernetes nodes.
+2. Verifies Ansible connectivity.
+3. Runs the Kubernetes bootstrap playbook.
+
+The Ansible automation then:
+
+* Configures Kubernetes node prerequisites.
+* Installs and configures containerd.
+* Installs pinned Kubernetes packages.
+* Initializes the kubeadm control plane.
+* Provisions the administrative kubeconfig.
+* Generates short-lived kubeadm join credentials.
+* Joins worker nodes to the cluster.
+
+The bootstrap script is the recommended entry point after provisioning or
+rebuilding the Kubernetes virtual machines.
+
+### Run Ansible directly
+
+For development or troubleshooting, the Ansible commands can also be executed
+directly.
+
 Change into the Ansible directory:
 
 ```bash
@@ -268,19 +310,23 @@ Review the Ansible changes:
 ansible-playbook playbooks/prepare-nodes.yml --check --diff
 ```
 
-Apply the Kubernetes bootstrap:
+Run the bootstrap playbook:
 
 ```bash
 ansible-playbook playbooks/prepare-nodes.yml
 ```
 
-The playbook prepares all Kubernetes nodes, installs and configures containerd,
-installs pinned Kubernetes packages, initializes the control plane and joins
-the worker nodes to the cluster.
+When using the playbook directly after recreating the virtual machines, SSH host keys may need to be refreshed first.
+
+From the repository root:
+
+```bash
+./scripts/refresh-k8s-known-hosts.sh
+```
 
 ## Destroy the infrastructure
 
-Return to the repository root and run:
+From the repository root, run:
 
 ```bash
 ./scripts/terragrunt-bw.sh run --all destroy \
@@ -333,6 +379,8 @@ Return to the repository root and run:
 * Automated worker-node join
 * Runtime generation of kubeadm join credentials
 * Idempotent worker join detection
+* Automatic SSH host-key refresh after Kubernetes VM rebuilds
+* Kubernetes bootstrap wrapper with Ansible connectivity validation
 * Common node troubleshooting utilities
 
 ---
@@ -353,8 +401,11 @@ Kubernetes API endpoint:
 https://k8s-cpl-01.home:6443
 ```
 
-Cluster networking is not yet configured. Until Cilium is installed, the nodes
-are expected to remain in the `NotReady` state.
+Cluster networking is not yet configured.
+
+Until Cilium is installed, the nodes are expected to remain in the `NotReady`
+state. This is expected after a successful kubeadm bootstrap because no
+Container Network Interface (CNI) plugin has been installed yet.
 
 ---
 
@@ -377,6 +428,8 @@ are expected to remain in the `NotReady` state.
 * [x] Kubernetes package installation
 * [x] kubeadm control-plane bootstrap
 * [x] Worker node join
+* [x] Automated bootstrap entry point
+* [ ] Clean rebuild validation
 * [ ] Cilium
 * [ ] Cluster validation
 
@@ -457,6 +510,13 @@ unintended upgrades.
 `.terraform.lock.hcl` files are intentionally committed to Git so that OpenTofu
 provider versions and checksums remain reproducible.
 
+The Kubernetes bootstrap is designed to be repeatable after infrastructure
+rebuilds. The `bootstrap-k8s.sh` entry point refreshes SSH host keys before
+running Ansible so that recreated virtual machines using the same hostnames and
+addresses can be configured without retaining stale SSH host-key entries.
+
+A complete clean rebuild test remains part of the current validation work.
+
 ---
 
 # Security
@@ -469,6 +529,25 @@ Backend credentials are retrieved from Bitwarden at runtime.
 kubeadm worker join credentials are generated dynamically during the Ansible
 bootstrap and are only used during execution.
 
+## SSH Host Keys
+
+The Kubernetes virtual machines are intentionally rebuildable and retain stable DNS names and IP addresses between rebuilds.
+
+Recreating a virtual machine generates new SSH host keys. Existing entries in
+the local SSH `known_hosts` file therefore become stale and would normally cause
+SSH host identification errors.
+
+The Kubernetes bootstrap wrapper handles this by running:
+
+```text
+scripts/refresh-k8s-known-hosts.sh
+```
+
+before Ansible connectivity is tested.
+
+This behavior is intended for the controlled, rebuildable Kubernetes nodes in
+this homelab environment.
+
 ---
 
 # Notes
@@ -479,5 +558,15 @@ reusable OpenTofu module.
 OpenTofu state is stored remotely in RustFS rather than inside the local
 Terragrunt cache.
 
-The current Kubernetes cluster has completed the kubeadm bootstrap stage. The
-next milestone is installing Cilium and validating cluster networking, CoreDNS and node readiness.
+The recommended Kubernetes bootstrap entry point is:
+
+```bash
+./scripts/bootstrap-k8s.sh
+```
+
+The current Kubernetes cluster has completed the kubeadm bootstrap stage.
+
+The next validation milestone is proving the complete infrastructure and
+Kubernetes bootstrap from a clean VM rebuild. After that, the next implementation
+milestone is installing Cilium and validating cluster networking, CoreDNS,
+Kubernetes API readiness and node readiness.

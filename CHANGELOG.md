@@ -26,6 +26,8 @@
 * Automated Kubernetes worker-node join
 * Runtime generation of short-lived kubeadm join tokens
 * Idempotent worker join validation using `/etc/kubernetes/kubelet.conf`
+* Kubernetes bootstrap wrapper script with Ansible connectivity validation
+* Automatic SSH known-host refresh for rebuildable Kubernetes nodes
 
 ### Changed
 
@@ -34,9 +36,11 @@
 * Kubernetes host preparation is managed with Ansible instead of manual shell steps
 * Kubernetes and container runtime versions are explicitly pinned for reproducible cluster builds
 * Control-plane VM CPU allocation increased to satisfy kubeadm requirements
+* Kubernetes bootstrap is now started through `scripts/bootstrap-k8s.sh`
 
 ### Planned
 
+* Clean end-to-end Kubernetes bootstrap validation after VM rebuild
 * Cilium
 * Cluster networking validation
 * Argo CD

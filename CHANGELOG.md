@@ -20,6 +20,9 @@
 * Pinned Kubernetes `1.36.4` packages
 * Automated installation of `kubelet`, `kubeadm`, and `kubectl`
 * Package holds for Kubernetes components
+* kubeadm control-plane configuration and validation
+* Automated kubeadm control-plane initialization
+* Administrative kubeconfig provisioning for the control-plane user
 
 ### Changed
 
@@ -27,10 +30,10 @@
 * Terraform state is stored remotely instead of in the local Terragrunt cache
 * Kubernetes host preparation is managed with Ansible instead of manual shell steps
 * Kubernetes and container runtime versions are explicitly pinned for reproducible cluster builds
+* Control-plane VM CPU allocation increased to satisfy kubeadm requirements
 
 ### Planned
 
-* kubeadm control-plane initialization
 * Worker node join
 * Cilium
 * Argo CD

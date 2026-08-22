@@ -8,3 +8,11 @@
     - k8s_prereq #this is named after the roles/k8s_prereq folder!
     - containerd
     - k8s_packages
+  
+- name: Configure kubeadm control plane
+  hosts: control_plane
+  become: true
+  gather_facts: true
+
+  roles:
+    - kubeadm_control_plane

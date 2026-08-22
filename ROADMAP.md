@@ -18,8 +18,8 @@
 * [x] Worker node join
 * [x] Automated bootstrap entry point
 * [x] Clean rebuild validation
-* [ ] Cilium
-* [ ] Cluster validation
+* [x] Cilium
+* [x] Cluster validation
 
 ## Stage 3 — GitOps Platform
 

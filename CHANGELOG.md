@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### Planned
+
+* Improve Cilium Helm idempotency with the Ansible Helm module
+* Evaluate Hubble
+* Evaluate Cilium kube-proxy replacement
+* GitOps-managed Cilium installation
+* Argo CD
+* OpenBao
+
+## v0.2.0
+
 ### Added
 
 * S3-compatible remote OpenTofu state backend using RustFS
@@ -28,39 +39,30 @@
 * Idempotent worker join validation using `/etc/kubernetes/kubelet.conf`
 * Kubernetes bootstrap wrapper script with Ansible connectivity validation
 * Automatic SSH known-host refresh for rebuildable Kubernetes nodes
-* Validated end-to-end Kubernetes bootstrap after a clean VM rebuild
+* Automatic local kubeconfig refresh after cluster rebuilds
 * Cilium installation using Ansible and Helm
 * Cilium role for Kubernetes CNI installation
 * Dedicated Cilium installation playbook
 * Kubernetes node readiness validation after CNI installation
 * CoreDNS validation after Cilium installation
 * Conditional CoreDNS restart handling after Cilium installation
-* Local kubeconfig refresh before Cilium installation
-* Full bootstrap flow now installs Cilium after kubeadm cluster initialization
-* Full bootstrap validation including Cilium after clean VM rebuild
+* Validated end-to-end Kubernetes bootstrap after a clean VM rebuild
+* Full bootstrap flow including Cilium after a clean VM rebuild
 
 ### Changed
 
 * OpenTofu dependency lock files are now tracked in Git
-* Terraform state is stored remotely instead of in the local Terragrunt cache
+* Terraform state is stored remotely in RustFS instead of the local Terragrunt cache
 * Kubernetes host preparation is managed with Ansible instead of manual shell steps
+* Kubernetes bootstrap is executed through `scripts/bootstrap-k8s.sh`
 * Kubernetes and container runtime versions are explicitly pinned for reproducible cluster builds
 * Control-plane VM CPU allocation increased to satisfy kubeadm requirements
-* Kubernetes bootstrap is now started through `scripts/bootstrap-k8s.sh`
 
-### Planned
+## v0.1.0 (Historical milestone)
 
-* Improve Cilium Helm idempotency with Ansible Helm module
-* Evaluate Hubble
-* Evaluate Cilium kube-proxy replacement
-* GitOps-managed Cilium installation
-* Argo CD
-* OpenBao
+### Added
 
-## v0.1.0
-
-* Initial repository
-* OpenTofu module
-* Terragrunt
-* Proxmox VM provisioning
-* Cloud-Init support
+* Initial repository structure
+* OpenTofu module for Proxmox virtual machine provisioning
+* Terragrunt configuration
+* Ubuntu Cloud-Init support

@@ -7,15 +7,15 @@ Cilium is installed with Ansible using the official Cilium Helm chart.
 
 ## Current Mode
 
-Current Cilium mode:
+Current validated cluster:
 
-```text
-CNI: Cilium
-Installation method: Ansible + Helm
-Namespace: kube-system
-kube-proxy replacement: disabled
-kube-proxy: enabled
-```
+| Component | Status |
+|-----------|--------|
+| Kubernetes nodes | Ready |
+| CoreDNS | Healthy |
+| Cilium | Healthy |
+| Cilium Operator | Healthy |
+| kube-proxy | Enabled |
 
 The initial installation keeps kube-proxy enabled. Cilium kube-proxy replacement is intentionally left as future work because it requires a deliberate cluster bootstrap decision.
 

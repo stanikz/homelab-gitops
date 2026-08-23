@@ -17,10 +17,10 @@
 * [x] Validate all nodes reach `Ready`
 * [x] Refresh local kubeconfig before Cilium installation
 * [x] Validate full bootstrap flow including Cilium after clean VM rebuild
-* [ ] Improve Cilium Helm idempotency with Ansible Helm module
-* [ ] Decide whether to keep kube-proxy or rebuild later with Cilium kube-proxy replacement
+* [ ] Evaluate GitOps-managed Cilium
+* [ ] Improve Helm idempotency
 * [ ] Evaluate Hubble
-* [ ] Evaluate GitOps-managed Cilium installation
+* [ ] Evaluate kube-proxy replacement
 
 ## GitOps Platform
 

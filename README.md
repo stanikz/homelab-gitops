@@ -107,6 +107,7 @@ homelab-gitops/
 │       ├── playbooks/
 │       └── roles/
 │           ├── k8s_prereq/
+│           ├── cilium/
 │           ├── containerd/
 │           ├── k8s_packages/
 │           ├── kubeadm_control_plane/
@@ -544,6 +545,7 @@ Responsible for Kubernetes-specific host configuration and bootstrap:
 * Initializing the kubeadm control plane
 * Provisioning the administrative kubeconfig
 * Joining worker nodes
+* Installing Cilium
 
 This separation keeps the infrastructure and Kubernetes layers independently
 maintainable and makes clean cluster rebuilds easier to reproduce.

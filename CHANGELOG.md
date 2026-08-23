@@ -36,7 +36,7 @@
 * CoreDNS validation after Cilium installation
 * Conditional CoreDNS restart handling after Cilium installation
 * Local kubeconfig refresh before Cilium installation
-* Full bootstrap flow now installs Cilium after kubeadm cluster intialization
+* Full bootstrap flow now installs Cilium after kubeadm cluster initialization
 * Full bootstrap validation including Cilium after clean VM rebuild
 
 ### Changed

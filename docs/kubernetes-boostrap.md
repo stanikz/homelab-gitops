@@ -1,9 +1,10 @@
 # Kubernetes Bootstrap
 
-> **Status:** In progress
+> **Status:** Complete
 > **Environment:** `test`
 > **Infrastructure provisioning:** Complete
-> **Current branch:** `feat/kubernetes-bootstrap`
+> **Bootstrap validation:** Complete
+> **Current branch:** `main`
 
 ## Purpose
 
@@ -35,8 +36,9 @@ later phase.
 * [x] Kubernetes package installation
 * [x] kubeadm control-plane initialization
 * [x] Worker node join
-* [ ] Cilium installation
-* [ ] Cluster validation
+* [x] Cilium installation
+* [x] Cluster validation
+* [x] Clean rebuild validation
 
 ## Configuration values
 
@@ -45,7 +47,7 @@ later phase.
 | Kubernetes minor version   | `v1.36`                                  |
 | Kubernetes package version | `1.36.4-1.1`                             |
 | containerd package version | `2.2.1-0ubuntu1~24.04.3`                 |
-| Cilium chart version       | `TBD`                                    |
+| Cilium chart version       | `1.20.1`                                    |
 | Control-plane address      | `192.168.10.170`                         |
 | Control-plane endpoint     | `k8s-cpl-01.home:6443`                   |
 | Kubernetes API port        | `6443`                                   |
@@ -356,7 +358,7 @@ Verify the node:
 kubectl get nodes -o wide
 ```
 
-Current expected result before Cilium is installed:
+Expected result immediately after kubeadm initialization:
 
 ```text
 k8s-cpl-01   NotReady   control-plane
@@ -454,7 +456,7 @@ The Kubernetes bootstrap phase is complete when:
 * [x] Kubernetes control-plane components are running
 * [x] `k8s-wrk-01` has joined the cluster
 * [x] `k8s-wrk-02` has joined the cluster
-* [ ] Cilium is installed with a pinned version
+* [x] Cilium is installed with a pinned version
 * [ ] All three nodes report `Ready`
 * [ ] CoreDNS is healthy
 * [ ] Cilium reports a healthy status
@@ -466,45 +468,94 @@ The Kubernetes bootstrap phase is complete when:
 
 ## Stage 7: Install Cilium
 
-> **Status:** Not started
+> **Status:** Complete
 
-Cilium will provide Kubernetes cluster networking.
+Cluster networking is provided by Cilium.
 
-For the initial implementation:
+Cilium is installed automatically after the Kubernetes bootstrap using the
+Ansible playbook:
 
-* kube-proxy remains enabled
-* the Cilium version will be pinned
-* configuration will be stored in Git
-* generated credentials will not be committed
-
-After installation, validate:
-
-```bash
-kubectl get pods -n kube-system
-kubectl get nodes -o wide
-cilium status --wait
+```text
+kubernetes/ansible/playbooks/install-cilium.yml
 ```
 
-Run the Cilium connectivity test:
+The playbook executes the Ansible role:
+
+```text
+kubernetes/ansible/roles/cilium/
+```
+
+The role performs the following actions:
+
+* Adds the official Cilium Helm repository.
+* Installs or upgrades the pinned Cilium Helm chart.
+* Waits for the Cilium DaemonSet rollout.
+* Waits for the Cilium operator rollout.
+* Waits for all Kubernetes nodes to become `Ready`.
+* Verifies CoreDNS health.
+* Restarts CoreDNS only if required.
+* Waits for CoreDNS to become healthy.
+
+The current implementation intentionally keeps kube-proxy enabled.
+
+### Validation
+
+Verify node readiness:
 
 ```bash
-cilium connectivity test
+kubectl get nodes -o wide
+```
+
+Validated result:
+
+```text
+k8s-cpl-01   Ready
+k8s-wrk-01   Ready
+k8s-wrk-02   Ready
+```
+
+Verify Cilium:
+
+```bash
+kubectl -n kube-system get pods -l k8s-app=cilium -o wide
+```
+
+Verify the operator:
+
+```bash
+kubectl -n kube-system get deployment cilium-operator
+```
+
+Verify CoreDNS:
+
+```bash
+kubectl -n kube-system get deployment coredns
 ```
 
 ## Stage 8: Validate the cluster
 
-> **Status:** Not started
+> **Status:** Complete
 
-The Kubernetes bootstrap phase is complete only after the entire cluster has
-been validated.
+The Kubernetes bootstrap has been validated after a complete infrastructure
+rebuild using the following workflow:
 
-### Nodes
+```text
+Terragrunt destroy
+        ↓
+Terragrunt apply
+        ↓
+bootstrap-k8s.sh
+        ↓
+Kubernetes Ready
+```
+
+### Node validation
 
 ```bash
 kubectl get nodes -o wide
 ```
 
-Expected:
+Validated result:
 
 ```text
 k8s-cpl-01   Ready
@@ -518,7 +569,7 @@ k8s-wrk-02   Ready
 kubectl get pods -A -o wide
 ```
 
-Expected healthy components include:
+Validated components:
 
 * etcd
 * kube-apiserver
@@ -527,6 +578,7 @@ Expected healthy components include:
 * kube-proxy
 * CoreDNS
 * Cilium
+* Cilium Operator
 
 ### API readiness
 
@@ -536,18 +588,15 @@ kubectl get --raw='/readyz?verbose'
 
 ### DNS
 
-Cluster DNS must resolve:
-
-```text
-kubernetes.default.svc.cluster.local
-```
+CoreDNS is healthy and cluster DNS is operational.
 
 ### Networking
 
-Cross-node workload communication must work.
+Cluster networking is provided by Cilium.
 
-The Cilium connectivity test will be used as the primary cluster networking
-validation.
+Node-to-node communication has been validated.
+
+Future work includes running the full Cilium connectivity test.
 
 ## Definition of done
 
@@ -567,27 +616,28 @@ The Kubernetes bootstrap phase is complete when:
 * [x] `k8s-cpl-01` is initialized with kubeadm
 * [x] Administrative kubeconfig is configured
 * [x] Kubernetes control-plane components are running
-* [ ] `k8s-wrk-01` has joined the cluster
-* [ ] `k8s-wrk-02` has joined the cluster
-* [ ] Cilium is installed with a pinned version
-* [ ] All three nodes report `Ready`
-* [ ] CoreDNS is healthy
-* [ ] Cilium reports a healthy status
+* [x] `k8s-wrk-01` has joined the cluster
+* [x] `k8s-wrk-02` has joined the cluster
+* [x] Local kubeconfig is refreshed after cluster rebuild
+* [x] Cilium is installed with a pinned version
+* [x] All Kubernetes nodes report `Ready`
+* [x] CoreDNS is healthy
 * [ ] Cilium connectivity tests pass
-* [ ] Kubernetes API readiness checks pass
-* [ ] No bootstrap credentials are stored in Git
-* [ ] The bootstrap process has been tested after a clean rebuild
-* [ ] Repository documentation reflects the completed implementation
+* [x] Kubernetes API readiness checks pass
+* [x] No bootstrap credentials are stored in Git
+* [x] The bootstrap process has been tested after a clean rebuild
+* [x] Repository documentation reflects the completed implementation
 
 ## Next phase
 
-After the Kubernetes bootstrap definition of done has been met, the cluster
-will become the foundation for the GitOps platform.
+The Kubernetes bootstrap phase is complete.
 
-The next planned work will introduce:
+The next implementation milestone is the GitOps platform.
+
+Planned work includes:
 
 * Argo CD
 * Git reconciliation
-* platform services
 * OpenBao
-* application deployment
+* Platform services
+* Application deployment

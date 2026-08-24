@@ -25,3 +25,6 @@ override.tf.json
 
 # vscode extension and files
 .vscode
+
+# Omit kubecm.config
+kubecm.config

@@ -1,0 +1,37 @@
+---
+# app-of-apps root Application.
+#
+# This is the single entry point for the GitOps platform layer. Argo CD
+# reconciles this Application, which in turn points at gitops/platform/.
+# Every child Application placed under gitops/platform/ is discovered and
+# managed by Argo CD. Disaster recovery is a single `kubectl apply` of this
+# file (the install-argocd role does this automatically).
+#
+# REPLACE THE repoURL BELOW with the actual HTTPS URL of THIS repository,
+# e.g. https://github.com/<you>/homelab-gitops.git
+# The repo is public, so no credentials are required.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: argocd
+  # Keep the root app from being pruned by anything; it is the bootstrap anchor.
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/stanikz/homelab-gitops
+    targetRevision: feat/argocd
+    path: gitops/platform
+    directory:
+      recurse: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

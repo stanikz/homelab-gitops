@@ -43,3 +43,9 @@ ansible-playbook playbooks/install-cilium.yml
 
 echo
 echo "Kubernetes node preparation completed successfully."
+
+
+echo
+echo "Installing Argo CD..."
+
+ansible-playbook playbooks/install-argocd.yml

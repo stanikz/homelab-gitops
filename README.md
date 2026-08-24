@@ -71,7 +71,7 @@ Cloud-Init is responsible for the generic Ubuntu baseline, while Ansible manages
 | Kubernetes | kubeadm `v1.36.4` |
 | Container Runtime | containerd `2.2.1` |
 | Networking | Cilium `1.20.1` (Helm Chart)|
-| GitOps | Argo CD **(planned)** |
+| GitOps | Argo CD `10.4.0` (Helm Chart) |
 | Secrets Management | OpenBao **(planned)** |
 
 ---
@@ -106,12 +106,17 @@ homelab-gitops/
 │       ├── inventories/
 │       ├── playbooks/
 │       └── roles/
+│           ├── argocd/
 │           ├── k8s_prereq/
 │           ├── cilium/
 │           ├── containerd/
 │           ├── k8s_packages/
 │           ├── kubeadm_control_plane/
 │           └── kubeadm_worker/
+│
+├── gitops/
+│   ├── bootstrap/            # app-of-apps root Application
+│   └── platform/             # Argo CD-managed platform resources
 │
 └── scripts/
     ├── bootstrap-k8s.sh             # Kubernetes bootstrap entry point
@@ -440,6 +445,10 @@ From the repository root, run:
 * Cilium operator rollout validation
 * Kubernetes node readiness validation after CNI installation
 * CoreDNS validation after Cilium installation
+* Cilium kube-proxy replacement (kube-proxy skipped at kubeadm init)
+* Cilium LB-IPAM and L2 announcements for bare-metal load balancing
+* Argo CD installed via Ansible and Helm as the final bootstrap step
+* GitOps reconciliation of platform resources via an app-of-apps root Application
 ---
 
 # Current Kubernetes Cluster
@@ -460,11 +469,14 @@ https://k8s-cpl-01.home:6443
 
 Cluster networking is provided by Cilium.
 
-Cilium is installed with Ansible using the official Helm chart. The current
-installation keeps kube-proxy enabled.
+Cilium is installed with Ansible using the official Helm chart and runs in
+kube-proxy replacement mode; kube-proxy is not installed. Cilium also provides bare-metal load balancing through LB-IPAM and L2 announcements, allocating `LoadBalancer` service IPs from the reserved range `192.168.10.210`–`.220`.
 
 After Cilium installation, all Kubernetes nodes are expected to reach the
 `Ready` state and CoreDNS is expected to run successfully.
+
+The GitOps platform (Argo CD) is installed as the final bootstrap step. See
+`docs/argocd.md` and `docs/cilium.md`.
 
 ---
 
@@ -490,11 +502,12 @@ After Cilium installation, all Kubernetes nodes are expected to reach the
 * [x] Automated bootstrap entry point
 * [x] Clean rebuild validation
 * [x] Cilium
-* [ ] Cluster validation
+* [x] Cluster validation
+* [x] Cilium kube-proxy replacement, LB-IPAM and L2 announcements
 
 ## Stage 3 — GitOps Platform
 
-* [ ] Argo CD
+* [x] Argo CD
 * [ ] OpenBao
 * [ ] Monitoring
 * [ ] Logging

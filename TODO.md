@@ -20,12 +20,14 @@
 * [ ] Evaluate GitOps-managed Cilium
 * [ ] Improve Helm idempotency
 * [ ] Evaluate Hubble
-* [ ] Evaluate kube-proxy replacement
+* [x] Enable kube-proxy replacement (skipped at kubeadm init; Cilium handles service datapath)
+* [x] Enable LB-IPAM and L2 announcements for bare-metal load balancing
 
 ## GitOps Platform
 
-* [ ] Install Argo CD
-* [ ] Configure Git reconciliation
+* [x] Install Argo CD
+* [x] Configure Git reconciliation (app-of-apps root Application)
+* [ ] Move Argo CD off port-forward (Cilium Gateway API + TLS)
 * [ ] Install OpenBao
 
 ## Platform

@@ -21,10 +21,11 @@
 * [x] Clean rebuild validation
 * [x] Cilium
 * [x] Cluster validation
+* [x] Cilium kube-proxy replacement, LB-IPAM and L2 announcements
 
 ## Stage 3 — GitOps Platform
 
-* [ ] Argo CD
+* [x] Argo CD
 * [ ] OpenBao
 * [ ] Monitoring
 * [ ] Logging

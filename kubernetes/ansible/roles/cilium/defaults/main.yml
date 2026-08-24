@@ -4,3 +4,9 @@ cilium_namespace: kube-system
 cilium_release_name: cilium
 cilium_helm_repo_name: cilium
 cilium_helm_repo_url: https://helm.cilium.io/
+
+cilium_kube_proxy_replacement: "true"
+cilium_k8s_service_host: k8s-cpl-01.home
+cilium_k8s_service_port: "6443"
+cilium_l2announcements_enabled: "true"
+cilium_external_ips_enabled: "true"

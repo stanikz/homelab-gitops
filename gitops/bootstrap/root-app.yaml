@@ -22,7 +22,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/stanikz/homelab-gitops
-    targetRevision: feat/argocd
+    targetRevision: main
     path: gitops/platform
     directory:
       recurse: true

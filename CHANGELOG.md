@@ -2,14 +2,27 @@
 
 ## Unreleased
 
+### Added
+
+* Argo CD installed via Ansible and Helm as the final bootstrap step
+* app-of-apps root Application reconciling `gitops/platform/`
+* `gitops/` directory for GitOps-managed cluster resources
+* Cilium LB-IPAM with reserved pool `192.168.10.210`-`.240`
+* Cilium L2 announcements on `eth0` for `LoadBalancer` service reachability
+
+### Changed
+
+* Cilium now runs in kube-proxy replacement mode
+* kube-proxy is no longer installed (skipped at kubeadm init via `skipPhases`)
+* Cilium install now sets `k8sServiceHost`/`k8sServicePort` (required with
+  kube-proxy replacement)
+
 ### Planned
 
+* Move Argo CD off port-forward (Cilium Gateway API + TLS)
 * Improve Cilium Helm idempotency with the Ansible Helm module
 * Evaluate Hubble
-* Evaluate Cilium kube-proxy replacement
-* GitOps-managed Cilium installation
-* Argo CD
-* OpenBao
+* OpenBao (secrets), monitoring, logging
 
 ## v0.2.0
 

@@ -21,10 +21,6 @@
     cmd: kubeadm config validate --config /etc/kubernetes/kubeadm-config.yaml
   changed_when: false
 
-- name: Validate kubeadm configuration
-  ansible.builtin.command:
-    cmd: kubeadm config validate --config /etc/kubernetes/kubeadm-config.yaml
-  changed_when: false
 
 - name: Check whether control plane is already initialized
   ansible.builtin.stat:

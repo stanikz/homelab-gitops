@@ -1,0 +1,20 @@
+---
+# CiliumL2AnnouncementPolicy — makes LoadBalancer IPs reachable on the LAN by
+# answering ARP requests for them on the node's physical interface.
+#
+# Scoped explicitly to eth0 (the node interface carrying 192.168.10.0/24) so
+# Cilium does not answer ARP on unintended interfaces. loadBalancerIPs=true
+# announces IPs assigned by the CiliumLoadBalancerIPPool; externalIPs=true
+# announces any manually assigned Service.spec.externalIPs.
+#
+# Per-cluster policy, managed via GitOps. A cluster with a different interface
+# name overrides the interfaces list in its own manifest.
+apiVersion: cilium.io/v2alpha1
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: default
+spec:
+  interfaces:
+    - eth0
+  externalIPs: true
+  loadBalancerIPs: true

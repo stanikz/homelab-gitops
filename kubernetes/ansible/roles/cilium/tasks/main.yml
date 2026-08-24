@@ -21,7 +21,11 @@
       helm upgrade --install {{ cilium_release_name }} {{ cilium_helm_repo_name }}/cilium
       --version {{ cilium_chart_version }}
       --namespace {{ cilium_namespace }}
-      --set kubeProxyReplacement=false
+      --set kubeProxyReplacement={{ cilium_kube_proxy_replacement }}
+      --set k8sServiceHost={{ cilium_k8s_service_host }}
+      --set k8sServicePort={{ cilium_k8s_service_port }}
+      --set l2announcements.enabled={{ cilium_l2announcements_enabled }}
+      --set externalIPs.enabled={{ cilium_external_ips_enabled }}
   register: cilium_helm_install
   changed_when:
     - "'has been upgraded' in cilium_helm_install.stdout or 'has been installed' in cilium_helm_install.stdout"

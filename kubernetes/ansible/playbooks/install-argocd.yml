@@ -1,0 +1,17 @@
+---
+- name: Install Argo CD GitOps platform
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  become: false
+
+  vars:
+    ansible_become: false
+
+# Argo CD is installed from the admin workstation using the current
+# local kubectl context and the local Helm binary, mirroring the Cilium
+# installation. After the Argo CD components are healthy, the app-of-apps
+# root Application is applied so that Argo CD begins reconciling the
+# platform layer from Git.
+  roles:
+    - argocd

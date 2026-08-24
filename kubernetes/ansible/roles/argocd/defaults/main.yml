@@ -1,0 +1,10 @@
+---
+argocd_chart_version: "10.4.0"
+argocd_namespace: argocd
+argocd_release_name: argocd
+argocd_helm_repo_name: argo
+argocd_helm_repo_url: https://argoproj.github.io/argo-helm
+
+# Path (in this repo) to the app-of-apps root Application manifest, resolved
+# relative to the Ansible directory at play time.
+argocd_root_app_manifest: "{{ playbook_dir }}/../../../gitops/bootstrap/root-app.yaml"

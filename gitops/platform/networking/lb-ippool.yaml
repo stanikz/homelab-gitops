@@ -2,7 +2,7 @@
 # CiliumLoadBalancerIPPool — allocates external IPs to type: LoadBalancer
 # Services from a reserved range on the node subnet.
 #
-# The range 192.168.10.210-192.168.10.240 is reserved at the router: the DHCP
+# The range 192.168.10.210-192.168.10.220 is reserved at the router: the DHCP
 # pool ends at 192.168.10.209, so nothing else on the LAN leases into this band.
 #
 # This is per-cluster policy and is intentionally managed via GitOps (not the

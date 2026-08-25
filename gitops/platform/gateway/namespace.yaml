@@ -1,0 +1,10 @@
+---
+# Dedicated namespace for the shared Gateway. The Gateway is infrastructure
+# used by many apps' HTTPRoutes, so it lives in its own namespace rather than
+# in kube-system (the CNI's namespace) or any single app's namespace.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gateway
+  labels:
+    managed-by: argocd

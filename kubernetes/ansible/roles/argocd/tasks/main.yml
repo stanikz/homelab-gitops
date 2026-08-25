@@ -22,6 +22,7 @@
       --version {{ argocd_chart_version }}
       --namespace {{ argocd_namespace }}
       --create-namespace
+      --set configs.params."server\.insecure"=true
   register: argocd_helm_install
   changed_when:
     - "'has been upgraded' in argocd_helm_install.stdout or 'has been installed' in argocd_helm_install.stdout"

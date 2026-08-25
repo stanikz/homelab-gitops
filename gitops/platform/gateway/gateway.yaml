@@ -1,15 +1,20 @@
 ---
-# Shared cluster Gateway.
+# Shared cluster Gateway — now with HTTPS.
 #
-# Increment 3a: HTTP listener only, to prove routing in isolation before TLS
-# and cert-manager are introduced (3b adds the HTTPS listener + cert).
+# Increment 3b: adds an HTTPS listener and the cert-manager gateway-shim
+# annotation. cert-manager watches Gateways with this annotation, sees the TLS
+# listener, and automatically issues a certificate into the secret named in
+# the listener's certificateRefs (here: k8s-wildcard-tls), renewing it
+# automatically. No manual Certificate resource is required.
 #
-# The LoadBalancer service Cilium creates for this Gateway is pinned to
-# 192.168.10.210 via the LB-IPAM annotation, so the Pi-hole wildcard
-# (*.k8s.stanikz.com -> 192.168.10.210) always resolves to it.
+# START ON STAGING: the annotation points at letsencrypt-staging so the first
+# issuance uses Let's Encrypt staging (untrusted, but no rate limits). Once the
+# certificate reaches Ready and https serves the staging cert, change the
+# annotation to letsencrypt-prod and delete the k8s-wildcard-tls secret so
+# cert-manager re-issues a trusted production certificate.
 #
-# allowedRoutes: from all namespaces so that each app can keep its own
-# HTTPRoute in its own namespace (e.g. Argo CD's route lives in argocd).
+# The HTTP listener is kept so 3a's plain-HTTP test route still works and so
+# HTTP-to-HTTPS behaviour can be added later.
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
@@ -17,6 +22,7 @@ metadata:
   namespace: gateway
   annotations:
     io.cilium/lb-ipam-ips: "192.168.10.210"
+    cert-manager.io/cluster-issuer: letsencrypt-staging
 spec:
   gatewayClassName: cilium
   listeners:
@@ -24,6 +30,18 @@ spec:
       protocol: HTTP
       port: 80
       hostname: "*.k8s.stanikz.com"
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: "*.k8s.stanikz.com"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: k8s-wildcard-tls
       allowedRoutes:
         namespaces:
           from: All

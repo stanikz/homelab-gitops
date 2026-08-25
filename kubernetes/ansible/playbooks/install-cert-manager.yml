@@ -1,0 +1,16 @@
+---
+- name: Install cert-manager
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  become: false
+
+  vars:
+    ansible_become: false
+
+# cert-manager is installed from the admin workstation using the local kubectl
+# context and Helm binary, mirroring the Cilium and Argo CD installs. The
+# Gateway API integration is enabled so cert-manager can issue certificates for
+# TLS listeners on the Cilium Gateway.
+  roles:
+    - cert-manager

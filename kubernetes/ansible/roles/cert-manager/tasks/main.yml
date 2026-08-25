@@ -1,0 +1,116 @@
+---
+- name: Add Jetstack Helm repository
+  ansible.builtin.command:
+    cmd: helm repo add {{ cert_manager_helm_repo_name }} {{ cert_manager_helm_repo_url }}
+  register: cert_manager_helm_repo_add
+  changed_when: "'has been added' in cert_manager_helm_repo_add.stdout"
+  failed_when:
+    - cert_manager_helm_repo_add.rc != 0
+    - "'already exists' not in cert_manager_helm_repo_add.stderr"
+  become: false
+
+- name: Update Helm repositories
+  ansible.builtin.command:
+    cmd: helm repo update
+  changed_when: false
+  become: false
+
+- name: Install or upgrade cert-manager
+  ansible.builtin.command:
+    cmd: >
+      helm upgrade --install {{ cert_manager_release_name }} {{ cert_manager_helm_repo_name }}/cert-manager
+      --version {{ cert_manager_chart_version }}
+      --namespace {{ cert_manager_namespace }}
+      --create-namespace
+      --set crds.enabled={{ cert_manager_install_crds }}
+      --set config.apiVersion=controller.config.cert-manager.io/v1alpha1
+      --set config.kind=ControllerConfiguration
+      --set config.enableGatewayAPI={{ cert_manager_gateway_api_enabled }}
+  register: cert_manager_helm_install
+  changed_when:
+    - "'has been upgraded' in cert_manager_helm_install.stdout or 'has been installed' in cert_manager_helm_install.stdout"
+  become: false
+
+- name: Wait for cert-manager rollout
+  ansible.builtin.command:
+    cmd: kubectl -n {{ cert_manager_namespace }} rollout status deployment/cert-manager --timeout=5m
+  changed_when: false
+  become: false
+
+- name: Wait for cert-manager webhook rollout
+  ansible.builtin.command:
+    cmd: kubectl -n {{ cert_manager_namespace }} rollout status deployment/cert-manager-webhook --timeout=5m
+  changed_when: false
+  become: false
+
+- name: Wait for cert-manager cainjector rollout
+  ansible.builtin.command:
+    cmd: kubectl -n {{ cert_manager_namespace }} rollout status deployment/cert-manager-cainjector --timeout=5m
+  changed_when: false
+  become: false
+
+# --- Secrets from Bitwarden (requires BW_SESSION in the environment) ---
+
+- name: Fetch Cloudflare API token from Bitwarden
+  ansible.builtin.command:
+    cmd: bw get notes "{{ cert_manager_bw_item }}"
+  register: cert_manager_cf_token
+  changed_when: false
+  no_log: true
+  become: false
+
+- name: Fetch ACME account email from Bitwarden
+  ansible.builtin.command:
+    cmd: bw get item "{{ cert_manager_bw_item }}"
+  register: cert_manager_bw_item_raw
+  changed_when: false
+  no_log: true
+  become: false
+
+- name: Extract ACME email from Bitwarden item
+  ansible.builtin.set_fact:
+    cert_manager_acme_email: >-
+      {{ (cert_manager_bw_item_raw.stdout | from_json).fields
+         | selectattr('name', 'equalto', 'email') | map(attribute='value') | first }}
+  no_log: true
+
+- name: Render Cloudflare API token secret manifest
+  ansible.builtin.command:
+    cmd: >
+      kubectl -n {{ cert_manager_namespace }} create secret generic cloudflare-api-token
+      --from-literal=api-token={{ cert_manager_cf_token.stdout }}
+      --dry-run=client -o yaml
+  register: cert_manager_cf_secret_manifest
+  changed_when: false
+  no_log: true
+  become: false
+
+- name: Apply Cloudflare API token secret
+  ansible.builtin.command:
+    cmd: kubectl apply -f -
+    stdin: "{{ cert_manager_cf_secret_manifest.stdout }}"
+  changed_when: true
+  no_log: true
+  become: false
+
+# --- ClusterIssuers (email injected, not in Git) ---
+
+- name: Render ClusterIssuers manifest
+  ansible.builtin.template:
+    src: cluster-issuers.yaml.j2
+    dest: /tmp/cert-manager-cluster-issuers.yaml
+    mode: "0600"
+  become: false
+
+- name: Apply ClusterIssuers
+  ansible.builtin.command:
+    cmd: kubectl apply -f /tmp/cert-manager-cluster-issuers.yaml
+  register: cert_manager_issuers_apply
+  changed_when: "'created' in cert_manager_issuers_apply.stdout or 'configured' in cert_manager_issuers_apply.stdout"
+  become: false
+
+- name: Remove rendered ClusterIssuers manifest
+  ansible.builtin.file:
+    path: /tmp/cert-manager-cluster-issuers.yaml
+    state: absent
+  become: false

@@ -1,0 +1,29 @@
+---
+# Shared cluster Gateway.
+#
+# Increment 3a: HTTP listener only, to prove routing in isolation before TLS
+# and cert-manager are introduced (3b adds the HTTPS listener + cert).
+#
+# The LoadBalancer service Cilium creates for this Gateway is pinned to
+# 192.168.10.210 via the LB-IPAM annotation, so the Pi-hole wildcard
+# (*.k8s.stanikz.com -> 192.168.10.210) always resolves to it.
+#
+# allowedRoutes: from all namespaces so that each app can keep its own
+# HTTPRoute in its own namespace (e.g. Argo CD's route lives in argocd).
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: cilium-gateway
+  namespace: gateway
+  annotations:
+    io.cilium/lb-ipam-ips: "192.168.10.210"
+spec:
+  gatewayClassName: cilium
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      hostname: "*.k8s.stanikz.com"
+      allowedRoutes:
+        namespaces:
+          from: All

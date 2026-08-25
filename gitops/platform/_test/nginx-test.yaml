@@ -1,0 +1,66 @@
+---
+# Throwaway test backend to prove the Gateway routes traffic end to end.
+# This is upstream nginx-the-webserver used as a ClusterIP backend — it has
+# nothing to do with ingress-nginx. Delete this whole file once 3a is validated.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gateway-test
+  labels:
+    managed-by: argocd
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-test
+  namespace: gateway-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-test
+  template:
+    metadata:
+      labels:
+        app: nginx-test
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.27
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-test
+  namespace: gateway-test
+spec:
+  selector:
+    app: nginx-test
+  ports:
+    - port: 80
+      targetPort: 80
+---
+# HTTPRoute lives in the app's namespace (gateway-test) and attaches to the
+# shared Gateway in the gateway namespace by parentRef. This is the standard
+# Gateway API cross-namespace pattern.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: nginx-test
+  namespace: gateway-test
+spec:
+  parentRefs:
+    - name: cilium-gateway
+      namespace: gateway
+  hostnames:
+    - "test.k8s.stanikz.com"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: nginx-test
+          port: 80

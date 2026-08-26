@@ -15,4 +15,4 @@ kubernetes_dns_domain: "cluster.local"
 containerd_cri_socket: "unix:///run/containerd/containerd.sock"
 
 kubernetes_admin_user: "ubuntu"
-#kubernetes_cluster_name: "homelab-k8s"
+# kubernetes_cluster_name: "homelab-k8s"

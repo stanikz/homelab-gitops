@@ -40,12 +40,19 @@ configuration management and GitOps principles.
                         │
                         ▼
                       Cilium
+              (CNI, kube-proxy replacement,
+               LB-IPAM + L2, Gateway API)
                         │
                         ▼
                      Argo CD
+              (app-of-apps, GitOps)
                         │
                         ▼
-              Applications & Platform
+              Platform services
+        (cert-manager, Gateway, …)
+                        │
+                        ▼
+                  Applications
 ```
 
 Infrastructure state is stored remotely in an S3-compatible RustFS bucket.
@@ -72,6 +79,8 @@ Cloud-Init is responsible for the generic Ubuntu baseline, while Ansible manages
 | Container Runtime | containerd `2.2.1` |
 | Networking | Cilium `1.20.1` (Helm Chart)|
 | GitOps | Argo CD `10.4.0` (Helm Chart) |
+| Ingress | Cilium Gateway API (Gateway API CRDs `v1.6.1`) |
+| TLS Certificates | cert-manager `v1.19.3` (Let's Encrypt, Cloudflare DNS-01) |
 | Secrets Management | OpenBao **(planned)** |
 
 ---
@@ -107,6 +116,7 @@ homelab-gitops/
 │       ├── playbooks/
 │       └── roles/
 │           ├── argocd/
+│           ├── cert_manager/
 │           ├── k8s_prereq/
 │           ├── cilium/
 │           ├── containerd/
@@ -117,6 +127,10 @@ homelab-gitops/
 ├── gitops/
 │   ├── bootstrap/            # app-of-apps root Application
 │   └── platform/             # Argo CD-managed platform resources
+│       ├── argocd/           # Argo CD HTTPRoute
+│       ├── gateway/          # shared Cilium Gateway (HTTP/HTTPS)
+│       ├── networking/       # Cilium LB-IPAM pool + L2 policy
+│       └── cert-manager/     # (issuers are rendered by Ansible, not here)
 │
 └── scripts/
     ├── bootstrap-k8s.sh             # Kubernetes bootstrap entry point
@@ -467,16 +481,15 @@ Kubernetes API endpoint:
 https://k8s-cpl-01.home:6443
 ```
 
-Cluster networking is provided by Cilium.
+Cluster networking is provided by Cilium in kube-proxy replacement mode, with
+LB-IPAM and L2 announcements for bare-metal load balancing.
 
-Cilium is installed with Ansible using the official Helm chart and runs in
-kube-proxy replacement mode; kube-proxy is not installed. Cilium also provides bare-metal load balancing through LB-IPAM and L2 announcements, allocating `LoadBalancer` service IPs from the reserved range `192.168.10.210`–`.220`.
+Ingress is provided by the Cilium Gateway API through a single shared Gateway
+at 192.168.10.210, with TLS certificates issued automatically by cert-manager
+(Let's Encrypt via Cloudflare DNS-01). Platform UIs are exposed as hostnames
+under *.k8s.stanikz.com — for example Argo CD at https://argocd.k8s.stanikz.com.
 
-After Cilium installation, all Kubernetes nodes are expected to reach the
-`Ready` state and CoreDNS is expected to run successfully.
-
-The GitOps platform (Argo CD) is installed as the final bootstrap step. See
-`docs/argocd.md` and `docs/cilium.md`.
+See docs/cilium.md, docs/gateway.md, docs/cert-manager.md and docs/argocd.md.
 
 ---
 
@@ -508,6 +521,8 @@ The GitOps platform (Argo CD) is installed as the final bootstrap step. See
 ## Stage 3 — GitOps Platform
 
 * [x] Argo CD
+* [x] Cilium Gateway API ingress
+* [x] cert-manager (automated TLS)
 * [ ] OpenBao
 * [ ] Monitoring
 * [ ] Logging
@@ -638,11 +653,9 @@ The recommended Kubernetes bootstrap entry point is:
 ./scripts/bootstrap-k8s.sh
 ```
 
-The current Kubernetes cluster has completed the kubeadm bootstrap stage.
+The complete infrastructure, Kubernetes bootstrap, and GitOps platform have been
+validated from a clean VM rebuild without manual configuration of the nodes.
 
-The complete infrastructure and Kubernetes bootstrap has been successfully
-validated from a clean VM rebuild without requiring manual configuration of the Kubernetes nodes.
-
-Cilium has been installed using Ansible and Helm. The cluster has been validated with all nodes in the `Ready` state and CoreDNS running successfully.
-
-The next implementation milestone is the GitOps platform, starting with Argo CD.
+The GitOps platform (Argo CD, Cilium Gateway API, cert-manager) is in place.
+The next implementation milestone is secret management (OpenBao), followed by
+monitoring and logging.

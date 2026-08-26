@@ -61,8 +61,9 @@ gitops/
 ├── bootstrap/
 │   └── root-app.yaml            # app-of-apps root Application
 └── platform/
-    └── namespaces/
-        └── platform-namespaces.yaml
+    ├── argocd/                  # Argo CD HTTPRoute
+    ├── gateway/                 # shared Cilium Gateway (HTTP/HTTPS)
+    └── networking/              # Cilium LB-IPAM pool + L2 policy
 ```
 
 `gitops/` is intentionally self-contained. It contains only the resources Argo CD reconciles, not the Ansible that installs Argo CD. This keeps the boundary between "what installs the reconciler" and "what the reconciler manages" visible, and would make a future split into a separate GitOps repository clean.
@@ -177,32 +178,26 @@ The Argo CD version is pinned. Upgrading is a deliberate change to
 `helm upgrade --install` converges to the pinned version and does not drift to
 whatever is newest upstream.
 
-When deliberately upgrading, note the Argo CD **CRD caveat**: Helm installs CRDs
-on first install but does not upgrade them on subsequent `helm upgrade` runs. If
-a newer chart ships changed CRDs, the Deployments will update but the CRDs will
-not, which can cause subtle breakage. Always read the chart's upgrade notes and
-apply new CRDs explicitly if the notes call for it.
+When deliberately upgrading, note the Argo CD **CRD caveat**: Helm installs CRDs on first install but does not upgrade them on subsequent `helm upgrade` runs. 
+If a newer chart ships changed CRDs, the Deployments will update but the CRDs willnot, which can cause subtle breakage. 
+Always read the chart's upgrade notes and apply new CRDs explicitly if the notes call for it.
+
+Argo CD is installed with `server.insecure=true`. Changing this requires a
+matching change to how the Gateway/HTTPRoute reaches argocd-server.
 
 ---
 
 ## Accessing the UI
 
-Access is currently via port-forward. A stable LoadBalancer/ingress address is a
-later increment (Cilium LB-IPAM + L2 announcements, then Gateway API), which
-requires enabling kube-proxy replacement in the Cilium install.
+Argo CD is exposed over HTTPS through the Cilium Gateway at:
 
-```bash
-kubectl -n argocd port-forward svc/argocd-server 8080:443
-```
+    https://argocd.k8s.stanikz.com
 
-Retrieve the initial admin password:
-
-```bash
-kubectl -n argocd get secret argocd-initial-admin-secret \
-  -o jsonpath='{.data.password}' | base64 -d; echo
-```
-
-Browse to `https://localhost:8080` and log in as `admin`.
+TLS is terminated at the Gateway using the cert-manager wildcard certificate.
+Argo CD runs with `server.insecure=true` (set in the argocd role) so that
+argocd-server serves plain HTTP internally and the Gateway is the sole TLS
+terminator, avoiding double-TLS. The HTTPRoute is at
+gitops/platform/argocd/httproute.yaml.
 
 ---
 
@@ -213,16 +208,14 @@ The following was validated for the initial installation:
 * All Argo CD components reach `Running` (`kubectl -n argocd get pods`).
 * The root `Application` reports `Synced` / `Healthy`
   (`kubectl -n argocd get application root`).
-* The `platform` namespace is created by Argo CD from Git, with no manual
-  `kubectl create` (`kubectl get ns platform`), proving the reconciliation loop
-  end to end.
+* Platform resources under `gitops/platform/` (the Gateway, networking policies,
+  and Argo CD's own HTTPRoute) are created by Argo CD from Git with no manual
+  `kubectl apply`, proving the reconciliation loop end to end.
 
 ---
 
 ## Next steps
 
-* Move Argo CD off port-forward once the cluster network layer (kube-proxy
-  replacement, Cilium LB-IPAM, L2 announcements, Gateway API) is in place.
 * Add platform services under `gitops/platform/` (OpenBao, monitoring, logging),
   each reconciled automatically by the root app.
 * Introduce secret management (OpenBao + External Secrets Operator) so that Git

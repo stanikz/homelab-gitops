@@ -1,17 +1,27 @@
 # Changelog
 
-## Unreleased
+## v0.3.0 - 2026-08-27
 
 ### Added
 
-* Argo CD installed via Ansible and Helm as the final bootstrap step
-* app-of-apps root Application reconciling `gitops/platform/`
+* Cilium Gateway API enabled (gatewayAPI.enabled) with Gateway API CRDs v1.6.1
+* Shared Cilium Gateway pinned to 192.168.10.210 (HTTP + HTTPS listeners)
+* cert-manager v1.19.3 installed via Ansible/Helm with Gateway API integration
+* Let's Encrypt staging and production ClusterIssuers (Cloudflare DNS-01)
+* Cloudflare API token and ACME email sourced from Bitwarden at runtime
+* Automated wildcard certificate for *.k8s.stanikz.com
+* Argo CD HTTPRoute exposing argocd.k8s.stanikz.com over HTTPS
+* docs/gateway.md and docs/cert-manager.md
+* ArgoCD app-of-apps root Application reconciling `gitops/platform/`
 * `gitops/` directory for GitOps-managed cluster resources
 * Cilium LB-IPAM with reserved pool `192.168.10.210`-`.240`
 * Cilium L2 announcements on `eth0` for `LoadBalancer` service reachability
 
 ### Changed
 
+* Removed placeholder platform namespace
+* Argo CD runs with server.insecure=true; TLS is terminated at the Gateway
+* Argo CD access is now via the Gateway (HTTPS) rather than port-forward
 * Cilium now runs in kube-proxy replacement mode
 * kube-proxy is no longer installed (skipped at kubeadm init via `skipPhases`)
 * Cilium install now sets `k8sServiceHost`/`k8sServicePort` (required with
@@ -19,12 +29,11 @@
 
 ### Planned
 
-* Move Argo CD off port-forward (Cilium Gateway API + TLS)
 * Improve Cilium Helm idempotency with the Ansible Helm module
 * Evaluate Hubble
 * OpenBao (secrets), monitoring, logging
 
-## v0.2.0
+## v0.2.0 - 2026-08-24
 
 ### Added
 

@@ -27,7 +27,10 @@
 
 * [x] Install Argo CD
 * [x] Configure Git reconciliation (app-of-apps root Application)
-* [ ] Move Argo CD off port-forward (Cilium Gateway API + TLS)
+* [x] Cilium Gateway API ingress (shared Gateway, pinned IP)
+* [x] cert-manager with automated Let's Encrypt certificates (Cloudflare DNS-01)
+* [x] Expose Argo CD over HTTPS via the Gateway (off port-forward)
+* [ ] Persist/restore TLS cert across rebuilds (via OpenBao/ESO)
 * [ ] Install OpenBao
 
 ## Platform

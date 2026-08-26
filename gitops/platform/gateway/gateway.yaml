@@ -22,6 +22,7 @@ metadata:
   namespace: gateway
   annotations:
     io.cilium/lb-ipam-ips: "192.168.10.210"
+    # change this value to letsencrypt-staging in case of heavly rebuilding the cluster
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   gatewayClassName: cilium

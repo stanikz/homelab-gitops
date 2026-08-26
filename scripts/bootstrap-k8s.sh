@@ -49,3 +49,7 @@ echo
 echo "Installing Argo CD..."
 
 ansible-playbook playbooks/install-argocd.yml
+
+echo
+echo "Installing cert-manager..."
+ansible-playbook playbooks/install-cert-manager.yml

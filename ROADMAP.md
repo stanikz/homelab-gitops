@@ -26,6 +26,8 @@
 ## Stage 3 — GitOps Platform
 
 * [x] Argo CD
+* [x] Cilium Gateway API ingress
+* [x] cert-manager (Let's Encrypt, Cloudflare DNS-01)
 * [ ] OpenBao
 * [ ] Monitoring
 * [ ] Logging

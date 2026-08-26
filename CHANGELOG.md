@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.3.1 - 2026-08-27
+
+* Documenting the cleanup. 
+  
 ## v0.3.0 - 2026-08-27
 
 ### Added
@@ -14,7 +18,7 @@
 * docs/gateway.md and docs/cert-manager.md
 * ArgoCD app-of-apps root Application reconciling `gitops/platform/`
 * `gitops/` directory for GitOps-managed cluster resources
-* Cilium LB-IPAM with reserved pool `192.168.10.210`-`.240`
+* Cilium LB-IPAM with reserved pool `192.168.10.210`-`.220`
 * Cilium L2 announcements on `eth0` for `LoadBalancer` service reachability
 
 ### Changed

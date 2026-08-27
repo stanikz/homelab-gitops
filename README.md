@@ -49,7 +49,7 @@ configuration management and GitOps principles.
                         │
                         ▼
               Platform services
-        (cert-manager, Gateway, …)
+                  (Gateway, …)
                         │
                         ▼
                   Applications
